@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garden Rosas Decor - Flores e Artigos Religiosos</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-rose"></i>
+                <h1>Garden Rosas Decor</h1>
+            </div>
+            <nav class="nav">
+                <a href="#home" class="nav-link active">Início</a>
+                <a href="#produtos" class="nav-link">Produtos</a>
+                <a href="#sobre" class="nav-link">Sobre</a>
+                <a href="#contato" class="nav-link">Contato</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h2>Flores de Plástico e Artigos Religiosos</h2>
+                    <p>Encontre as mais belas flores artificiais e itens religiosos para decorar sua casa e expressar sua fé.</p>
+                    <button class="btn-primary" onclick="scrollToProducts()">Ver Produtos</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="produtos" class="products-section">
+            <div class="container">
+                <h2 class="section-title">Nossos Produtos</h2>
+                
+                <div class="filters">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar produtos...">
+                    </div>
+                    <div class="category-filters">
+                        <button class="filter-btn active" data-category="todos">Todos</button>
+                        <button class="filter-btn" data-category="flores">Flores</button>
+                        <button class="filter-btn" data-category="velas">Velas</button>
+                        <button class="filter-btn" data-category="quadros">Quadros</button>
+                        <button class="filter-btn" data-category="santinhos">Santinhos</button>
+                    </div>
+                </div>
+
+                <div id="productGrid" class="product-grid">
+                    <!-- Produtos serão carregados aqui dinamicamente -->
+                </div>
+            </div>
+        </section>
+
+        <section id="sobre" class="about-section">
+            <div class="container">
+                <h2 class="section-title">Sobre Maria Rosa</h2>
+                
+                <div class="about-content">
+                    <div class="about-text">
+                        <h3>Nossa História</h3>
+                        <p>Há mais de 15 anos,  Rosa dedica-se a oferecer os mais belos produtos para decoração e devoção religiosa. Nossa loja especializada é um refúgio de paz e beleza, onde você encontra flores artificiais de alta qualidade e artigos religiosos cuidadosamente selecionados.</p>
+                        
+                        <h3>Nossa Missão</h3>
+                        <p>Proporcionar momentos de paz e espiritualidade através de produtos que trazem beleza e fé ao seu lar. Acreditamos que cada item em nossa loja carrega uma energia especial, capaz de transformar ambientes e tocar corações.</p>
+                        
+                        <div class="features">
+                            <div class="feature">
+                                <i class="fas fa-heart"></i>
+                                <h4>Produtos de Qualidade</h4>
+                                <p>Selecionamos cada item com carinho e atenção aos detalhes</p>
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-hands-praying"></i>
+                                <h4>Tradição Familiar</h4>
+                                <p>Uma empresa familiar que valoriza a fé e a tradição</p>
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-leaf"></i>
+                                <h4>Flores Duradouras</h4>
+                                <p>Flores artificiais que mantêm sua beleza por muito tempo</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="about-image">
+                        <div class="image-placeholder">
+                            <i class="fas fa-church"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contato" class="contact-section">
+            <div class="container">
+                <h2 class="section-title">Contato</h2>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fab fa-whatsapp"></i>
+                        <a\ href="https://wa.me/558799275516" target="_blank">WhatsApp: (87) 9927-5516</a>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>dasilvamariarosa436@gmail.com</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>R. Padre Medeiros - Centro - Exu-PE</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Seg a Sex: 8h às 18h | Sáb: 8h às 14h</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Garden Rosas Decor. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
