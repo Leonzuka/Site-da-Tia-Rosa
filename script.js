@@ -64,11 +64,11 @@ class ProductManager {
             },
             {
                 id: 7,
-                name: 'Quadro Jesus Cristo',
+                name: 'Quadro Arcanjo Miguel',
                 category: 'quadros',
                 price: 65.00,
-                description: 'Quadro decorativo do Sagrado Coração de Jesus, moldura em madeira nobre, 30x40cm. Impressão em alta qualidade.',
-                image: 'https://quadrosdecorativos.com/wp-content/uploads/2023/03/8503-CAPA-VERTICAL.jpg'
+                description: 'Quadro decorativo Arcanjo Miguel, moldura em madeira nobre, 30x40cm. Impressão em alta qualidade.',
+                image: 'https://cdn.awsli.com.br/600x450/1981/1981658/produto/209841647637028ec08.jpg'
             },
             {
                 id: 8,
@@ -200,7 +200,7 @@ class ProductManager {
             },
             {
                 id: 24,
-                name: 'Jarro de Suco',
+                name: 'Jarra de Suco',
                 category: 'utensilios',
                 price: 22.90,
                 description: 'Jarro de vidro com capacidade para 1L, ideal para servir sucos e bebidas.',
