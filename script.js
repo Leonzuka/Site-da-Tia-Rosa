@@ -20,7 +20,7 @@ class ProductManager {
                 category: 'flores',
                 price: 24.90,
                 description: 'Lindíssima rosa vermelha de seda premium, com pétalas realistas e haste flexível. Perfeita para decoração de ambientes ou arranjos especiais.',
-                image: 'https://via.placeholder.com/400x300/dc2626/ffffff?text=Rosa+Vermelha'
+                image: 'https://m.media-amazon.com/images/I/61I49qc6NeL._AC_SX679_.jpg'
             },
             {
                 id: 2,
@@ -28,7 +28,7 @@ class ProductManager {
                 category: 'flores',
                 price: 45.00,
                 description: 'Elegante buquê com 12 rosas brancas artificiais, ideal para decoração de casamentos e eventos especiais.',
-                image: 'https://via.placeholder.com/400x300/f8f9fa/333333?text=Buque+Branco'
+                image: 'https://www.floresonline.com.br/media/catalog/product/a/l/alta-1112-1.webp'
             },
             {
                 id: 3,
@@ -36,7 +36,7 @@ class ProductManager {
                 category: 'flores',
                 price: 18.50,
                 description: 'Belo lírio amarelo artificial com acabamento realista, perfeito para vasos e arranjos florais.',
-                image: 'https://via.placeholder.com/400x300/fbbf24/333333?text=Lirio+Amarelo'
+                image: 'https://acdn-us.mitiendanube.com/stores/001/049/883/products/56vzaed-1f96a250ecbb4886fd16177962972208-1024-1024.webp'
             },
             {
                 id: 4,
@@ -44,7 +44,7 @@ class ProductManager {
                 category: 'velas',
                 price: 12.00,
                 description: 'Vela votiva de cera natural branca, duração de 6 horas. Ideal para orações e momentos de reflexão.',
-                image: 'https://via.placeholder.com/400x300/f8f9fa/666666?text=Vela+Branca'
+                image: 'https://cdn.awsli.com.br/2500x2500/1810/1810998/produto/85595519/e2d98e0774.jpg'
             },
             {
                 id: 5,
@@ -52,7 +52,7 @@ class ProductManager {
                 category: 'velas',
                 price: 35.00,
                 description: 'Conjunto com 12 velas votivas em cores variadas: branco, amarelo, azul e rosa. Perfeitas para novenas.',
-                image: 'https://via.placeholder.com/400x300/3b82f6/ffffff?text=Kit+Velas'
+                image: 'https://a-static.mlcdn.com.br/800x560/kit-12-velas-votivas-7-dias-coloridas-260-gr-cada-sete-raios-de-luz/lojaolist/olsj1h7hqsqyuu87/8ba267eb3df43e0af5704be08746337b.jpeg'
             },
             {
                 id: 6,
@@ -60,7 +60,7 @@ class ProductManager {
                 category: 'velas',
                 price: 28.90,
                 description: 'Vela de vidro com duração de 7 dias, disponível em branco e vermelho. Ideal para promessas e orações prolongadas.',
-                image: 'https://via.placeholder.com/400x300/dc2626/ffffff?text=Vela+7+Dias'
+                image: 'https://cdn.awsli.com.br/800x800/1132/1132374/produto/42615073/7-dias-santoscapa1-l452593vf3.jpg'
             },
             {
                 id: 7,
@@ -68,7 +68,7 @@ class ProductManager {
                 category: 'quadros',
                 price: 65.00,
                 description: 'Quadro decorativo do Sagrado Coração de Jesus, moldura em madeira nobre, 30x40cm. Impressão em alta qualidade.',
-                image: 'https://via.placeholder.com/400x300/8b4a6b/ffffff?text=Jesus+Cristo'
+                image: 'https://quadrosdecorativos.com/wp-content/uploads/2023/03/8503-CAPA-VERTICAL.jpg'
             },
             {
                 id: 8,
@@ -76,15 +76,15 @@ class ProductManager {
                 category: 'quadros',
                 price: 58.00,
                 description: 'Belo quadro de Nossa Senhora Aparecida com moldura dourada, 25x35cm. Acabamento premium com vidro antirreflexo.',
-                image: 'https://via.placeholder.com/400x300/1e40af/ffffff?text=N.Senhora'
+                image: 'https://cdn.awsli.com.br/2500x2500/1981/1981658/produto/154379545da493e5a9e.jpg'
             },
             {
                 id: 9,
-                name: 'Quadro São Francisco de Assis',
+                name: 'Quadro Santa Ceia',
                 category: 'quadros',
                 price: 52.00,
                 description: 'Quadro artístico de São Francisco de Assis, moldura em madeira escura, 20x30cm. Perfeito para salas e quartos.',
-                image: 'https://via.placeholder.com/400x300/059669/ffffff?text=Sao+Francisco'
+                image: 'https://cdnv2.moovin.com.br/sjo/imagens/produtos/det/captura-de-tela-2021-04-12-170958.png'
             },
             {
                 id: 10,
@@ -92,15 +92,15 @@ class ProductManager {
                 category: 'quadros',
                 price: 75.00,
                 description: 'Quadro decorativo com terço entalhado em madeira, representando Nossa Senhora do Rosário, 35x45cm.',
-                image: 'https://via.placeholder.com/400x300/7c3aed/ffffff?text=Terco+Quadro'
+                image: 'https://static.casadamae.com.br/public/casadamae/imagens/produtos/terco-madeira-8mm-nossa-senhora-aparecida-entremeio-azul-8759.png'
             },
             {
                 id: 11,
-                name: 'Santinho São José',
+                name: 'Santinhos para oração',
                 category: 'santinhos',
                 price: 3.50,
                 description: 'Santinho de São José Operário em papel couché plastificado, com oração no verso. Tamanho padrão 6x10cm.',
-                image: 'https://via.placeholder.com/400x300/a3a3a3/ffffff?text=Santinho+Sao+Jose'
+                image: 'https://img.irroba.com.br/filters:fill(fff):quality(80)/paludodi/catalog/api/paludodi_blingirr/651db10f22829.jpg'
             },
             {
                 id: 12,
@@ -124,7 +124,7 @@ class ProductManager {
                 category: 'flores',
                 price: 89.90,
                 description: 'Belíssimo arranjo com flores mistas artificiais em vaso de cerâmica. Rosas, lírios e folhagens diversas.',
-                image: 'https://via.placeholder.com/400x300/10b981/ffffff?text=Arranjo+Flores'
+                image: 'https://cdn.iset.io/assets/46293/produtos/273/img_20161031_161504853_2.jpg'
             },
             {
                 id: 15,
