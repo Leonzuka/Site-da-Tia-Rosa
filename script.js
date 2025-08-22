@@ -7,21 +7,41 @@ class ProductManager {
 
     // Carrega produtos do localStorage
     loadProducts() {
-        const saved = localStorage.getItem('tiarosa_products');
-        if (saved) {
-            const products = JSON.parse(saved);
-            // Migração automática: adiciona quantity se não existir
-            const migratedProducts = products.map(product => ({
-                ...product,
-                quantity: product.quantity !== undefined ? product.quantity : 1
-            }));
-            
-            // Salva produtos migrados se houve alteração
-            if (products.some(p => p.quantity === undefined)) {
-                localStorage.setItem('tiarosa_products', JSON.stringify(migratedProducts));
+        try {
+            const saved = localStorage.getItem('tiarosa_products');
+            if (saved) {
+                const products = JSON.parse(saved);
+                console.log('📦 Produtos carregados do localStorage:', products.length, 'itens');
+                console.log('🕐 Último save:', localStorage.getItem('tiarosa_last_save'));
+                
+                // Migração automática: adiciona quantity se não existir
+                const migratedProducts = products.map(product => ({
+                    ...product,
+                    quantity: product.quantity !== undefined ? product.quantity : 1
+                }));
+                
+                // Salva produtos migrados se houve alteração
+                if (products.some(p => p.quantity === undefined)) {
+                    localStorage.setItem('tiarosa_products', JSON.stringify(migratedProducts));
+                    localStorage.setItem('tiarosa_last_save', new Date().toISOString());
+                    console.log('🔄 Produtos migrados automaticamente');
+                }
+                
+                return migratedProducts;
             }
+        } catch (error) {
+            console.error('❌ Erro ao carregar produtos do localStorage:', error);
             
-            return migratedProducts;
+            // Tentar backup se o principal falhar
+            try {
+                const backup = localStorage.getItem('tiarosa_products_backup');
+                if (backup) {
+                    console.log('🔄 Carregando do backup...');
+                    return JSON.parse(backup);
+                }
+            } catch (backupError) {
+                console.error('❌ Backup também falhou:', backupError);
+            }
         }
         
         // Produtos de exemplo para demonstração
@@ -307,7 +327,15 @@ class ProductManager {
 
     // Salva produtos no localStorage
     saveProducts() {
-        localStorage.setItem('tiarosa_products', JSON.stringify(this.products));
+        try {
+            localStorage.setItem('tiarosa_products', JSON.stringify(this.products));
+            localStorage.setItem('tiarosa_products_backup', JSON.stringify(this.products));
+            localStorage.setItem('tiarosa_last_save', new Date().toISOString());
+            console.log('✅ Produtos salvos:', this.products.length, 'itens');
+        } catch (error) {
+            console.error('❌ Erro ao salvar produtos:', error);
+            throw error;
+        }
     }
 
     // Adiciona novo produto
@@ -327,13 +355,31 @@ class ProductManager {
     updateProduct(id, productData) {
         const index = this.products.findIndex(p => p.id === id);
         if (index !== -1) {
+            const oldProduct = { ...this.products[index] };
             this.products[index] = {
                 ...this.products[index],
                 ...productData,
                 price: parseFloat(productData.price),
                 quantity: parseInt(productData.quantity) || 1
             };
+            
+            console.log('🔄 Atualizando produto ID:', id);
+            console.log('📊 Preço anterior:', oldProduct.price, '→ Novo preço:', this.products[index].price);
+            
             this.saveProducts();
+            
+            // Verificar se foi salvo corretamente
+            const savedCheck = localStorage.getItem('tiarosa_products');
+            if (savedCheck) {
+                const savedProducts = JSON.parse(savedCheck);
+                const savedProduct = savedProducts.find(p => p.id === id);
+                if (savedProduct && savedProduct.price === this.products[index].price) {
+                    console.log('✅ Preço salvo com sucesso no localStorage');
+                } else {
+                    console.error('❌ Erro: Preço não foi salvo corretamente!');
+                }
+            }
+            
             return this.products[index];
         }
         return null;
