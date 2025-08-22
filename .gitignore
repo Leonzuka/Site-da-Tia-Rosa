@@ -62,3 +62,7 @@ build/
 
 # Railway
 .railway/
+
+# Local images (will be migrated to Cloudinary)
+images/
+uploads/

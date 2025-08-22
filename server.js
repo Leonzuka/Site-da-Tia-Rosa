@@ -1,9 +1,19 @@
 const express = require('express');
 const multer = require('multer');
-const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
+const cloudinary = require('cloudinary').v2;
+
+// Carregar variáveis de ambiente
+require('dotenv').config();
+
+// Configurar Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,18 +27,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('.'));
 app.use('/images', express.static('images'));
 
-// Criar diretório de imagens se não existir
+// Manter compatibilidade com imagens locais existentes
 const imagesDir = path.join(__dirname, 'images', 'products');
 if (!fs.existsSync(imagesDir)) {
     fs.mkdirSync(imagesDir, { recursive: true });
 }
 
-// Configuração do multer para upload
+// Configuração do multer para Cloudinary
 const storage = multer.memoryStorage();
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB
+        fileSize: 10 * 1024 * 1024 // 10MB (Cloudinary suporta mais)
     },
     fileFilter: (req, file, cb) => {
         // Aceitar apenas imagens
@@ -40,7 +50,7 @@ const upload = multer({
     }
 });
 
-// Rota para upload de imagem
+// Rota para upload de imagem via Cloudinary
 app.post('/api/upload', upload.single('image'), async (req, res) => {
     try {
         if (!req.file) {
@@ -50,36 +60,43 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
             });
         }
 
-        // Gerar nome único para a imagem
+        // Gerar nome único para identificação
         const timestamp = Date.now();
         const originalName = req.file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const fileName = `produto_${timestamp}_${originalName}`;
-        const filePath = path.join(imagesDir, fileName);
+        const publicId = `tia-rosa/produtos/produto_${timestamp}_${originalName.split('.')[0]}`;
 
-        // Redimensionar e otimizar imagem com Sharp
-        await sharp(req.file.buffer)
-            .resize(800, 600, { 
-                fit: 'inside',
-                withoutEnlargement: true 
-            })
-            .jpeg({ 
-                quality: 85,
-                mozjpeg: true 
-            })
-            .toFile(filePath);
-
-        // URL da imagem
-        const imageUrl = `/images/products/${fileName}`;
+        // Upload para Cloudinary
+        const uploadResult = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream(
+                {
+                    public_id: publicId,
+                    folder: 'tia-rosa/produtos',
+                    transformation: [
+                        { width: 800, height: 600, crop: 'limit' },
+                        { quality: 'auto:good' },
+                        { format: 'auto' }
+                    ],
+                    eager: [
+                        { width: 200, height: 200, crop: 'thumb', gravity: 'center' }
+                    ]
+                },
+                (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                }
+            ).end(req.file.buffer);
+        });
 
         res.json({
             success: true,
-            message: 'Imagem enviada com sucesso!',
-            imageUrl: imageUrl,
-            fileName: fileName
+            message: 'Imagem enviada com sucesso para Cloudinary!',
+            imageUrl: uploadResult.secure_url,
+            publicId: uploadResult.public_id,
+            thumbnailUrl: uploadResult.eager[0].secure_url
         });
 
     } catch (error) {
-        console.error('Erro no upload:', error);
+        console.error('Erro no upload para Cloudinary:', error);
         res.status(500).json({
             success: false,
             message: 'Erro interno no servidor: ' + error.message
@@ -87,55 +104,66 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
     }
 });
 
-// Rota para listar imagens existentes
-app.get('/api/images', (req, res) => {
+// Rota para listar imagens do Cloudinary
+app.get('/api/images', async (req, res) => {
     try {
-        const files = fs.readdirSync(imagesDir);
-        const images = files
-            .filter(file => /\.(jpg|jpeg|png|webp|gif)$/i.test(file))
-            .map(file => ({
-                fileName: file,
-                url: `/images/products/${file}`,
-                uploadDate: fs.statSync(path.join(imagesDir, file)).mtime
-            }))
-            .sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+        // Listar imagens da pasta específica no Cloudinary
+        const result = await cloudinary.search
+            .expression('folder:tia-rosa/produtos')
+            .sort_by([['created_at', 'desc']])
+            .max_results(100)
+            .execute();
+
+        const images = result.resources.map(resource => ({
+            publicId: resource.public_id,
+            url: resource.secure_url,
+            fileName: resource.public_id.split('/').pop(),
+            uploadDate: resource.created_at,
+            format: resource.format,
+            bytes: resource.bytes
+        }));
 
         res.json({
             success: true,
-            images: images
+            images: images,
+            total: result.total_count
         });
     } catch (error) {
-        console.error('Erro ao listar imagens:', error);
+        console.error('Erro ao listar imagens do Cloudinary:', error);
         res.status(500).json({
             success: false,
-            message: 'Erro ao listar imagens'
+            message: 'Erro ao listar imagens: ' + error.message
         });
     }
 });
 
-// Rota para deletar imagem
-app.delete('/api/images/:fileName', (req, res) => {
+// Rota para deletar imagem do Cloudinary
+app.delete('/api/images/:publicId', async (req, res) => {
     try {
-        const fileName = req.params.fileName;
-        const filePath = path.join(imagesDir, fileName);
+        const publicId = req.params.publicId;
+        
+        // Decodificar o publicId se necessário (pode vir com caracteres especiais)
+        const decodedPublicId = decodeURIComponent(publicId);
 
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
+        // Deletar do Cloudinary
+        const result = await cloudinary.uploader.destroy(decodedPublicId);
+
+        if (result.result === 'ok') {
             res.json({
                 success: true,
-                message: 'Imagem deletada com sucesso!'
+                message: 'Imagem deletada com sucesso do Cloudinary!'
             });
         } else {
             res.status(404).json({
                 success: false,
-                message: 'Imagem não encontrada!'
+                message: 'Imagem não encontrada no Cloudinary!'
             });
         }
     } catch (error) {
-        console.error('Erro ao deletar imagem:', error);
+        console.error('Erro ao deletar imagem do Cloudinary:', error);
         res.status(500).json({
             success: false,
-            message: 'Erro ao deletar imagem'
+            message: 'Erro ao deletar imagem: ' + error.message
         });
     }
 });
@@ -169,6 +197,7 @@ app.use((error, req, res, next) => {
 // Iniciar servidor
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
-    console.log(`📁 Imagens serão salvas em: ${imagesDir}`);
+    console.log(`☁️ Imagens serão enviadas para Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME}`);
+    console.log(`📁 Pasta local de fallback: ${imagesDir}`);
     console.log(`🌐 Acesse: http://localhost:${PORT}`);
 });
