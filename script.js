@@ -6,6 +6,8 @@ class ProductManager {
         this.cache = new Map();
         this.isLoading = false;
         this.lastSync = null;
+        this.instanceId = Math.random().toString(36).substr(2, 9); // ID único para debug
+        console.log('🆕 ProductManager criado com ID:', this.instanceId);
         this.init();
     }
 
@@ -52,7 +54,7 @@ class ProductManager {
         this.isLoading = true;
         
         try {
-            console.log('📡 Carregando produtos da API...');
+            console.log(`📡 [${this.instanceId}] Carregando produtos da API...`);
             const response = await fetch('/api/products');
             
             if (!response.ok) {
@@ -68,7 +70,15 @@ class ProductManager {
                 // Cache local para fallback
                 this.saveToCache();
                 
-                console.log('✅ Produtos carregados da API:', this.products.length, 'itens');
+                console.log(`✅ [${this.instanceId}] Produtos carregados da API:`, this.products.length, 'itens');
+                
+                // Disparar evento de produtos carregados para re-renderizar se necessário
+                if (this.products.length > 0) {
+                    window.dispatchEvent(new CustomEvent('productsLoaded', { 
+                        detail: { products: this.products, count: this.products.length } 
+                    }));
+                }
+                
                 return this.products;
             } else {
                 throw new Error(data.message || 'Resposta inválida da API');
@@ -260,9 +270,16 @@ class ProductManager {
     }
 }
 
-// Instância global do gerenciador
-const productManager = new ProductManager();
-window.productManager = productManager; // Disponibilizar globalmente para admin.js
+// Instância global do gerenciador (singleton)
+let productManager;
+if (window.productManager) {
+    console.log('🔄 Usando ProductManager existente');
+    productManager = window.productManager;
+} else {
+    console.log('🆕 Criando novo ProductManager');
+    productManager = new ProductManager();
+    window.productManager = productManager; // Disponibilizar globalmente
+}
 
 // Elementos DOM
 const productGrid = document.getElementById('productGrid');
@@ -283,6 +300,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Configuração do modal de login
     setupLoginModal();
+    
+    // Listener para re-renderizar quando produtos forem carregados por outra instância
+    window.addEventListener('productsLoaded', function(event) {
+        console.log('🔄 Evento productsLoaded recebido:', event.detail.count, 'produtos');
+        if (productGrid && event.detail.count > 0) {
+            console.log('🎨 Re-renderizando produtos após evento...');
+            renderProducts();
+        }
+    });
 });
 
 // Inicialização de produtos
@@ -298,7 +324,7 @@ async function initializeProducts() {
             // Aguardar carregamento dos produtos
             console.log('📡 Carregando produtos via ProductManager...');
             await productManager.loadProducts();
-            console.log('📦 Produtos carregados, quantidade:', productManager.products.length);
+            console.log(`📦 [${productManager.instanceId}] Produtos carregados, quantidade:`, productManager.products.length);
             
             console.log('🎨 Renderizando produtos...');
             await renderProducts();
