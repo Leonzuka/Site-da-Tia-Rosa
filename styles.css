@@ -741,3 +741,261 @@ body {
 .empty-state p {
     font-size: 1.1rem;
 }
+
+/* Botão de Acesso Administrativo */
+.admin-access-btn {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #8B4A6B 0%, #A0506D 100%);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(139, 74, 107, 0.3);
+    transition: all 0.3s ease;
+    z-index: 100;
+    opacity: 0.6;
+}
+
+.footer {
+    position: relative;
+}
+
+.admin-access-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(139, 74, 107, 0.5);
+}
+
+/* Modal de Login */
+.login-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.login-modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-modal-content {
+    background: white;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideInUp 0.4s ease;
+}
+
+.login-header {
+    background: linear-gradient(135deg, #8B4A6B 0%, #A0506D 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.login-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.login-form {
+    padding: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #8B4A6B;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(139, 74, 107, 0.1);
+}
+
+.password-field {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+    color: #8B4A6B;
+}
+
+.login-error {
+    background: #fff5f5;
+    border: 1px solid #fed7d7;
+    color: #c53030;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    display: none;
+}
+
+.login-error.show {
+    display: block;
+    animation: shake 0.5s ease;
+}
+
+.login-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #8B4A6B 0%, #A0506D 100%);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+.login-btn:hover {
+    background: linear-gradient(135deg, #A0506D 0%, #8B4A6B 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 74, 107, 0.3);
+}
+
+.login-btn:active {
+    transform: translateY(0);
+}
+
+.login-info {
+    text-align: center;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.login-info i {
+    margin-right: 5px;
+    color: #8B4A6B;
+}
+
+/* Animações do Modal */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Responsividade do Modal */
+@media (max-width: 480px) {
+    .login-modal-content {
+        margin: 10px;
+        max-width: calc(100% - 20px);
+    }
+    
+    .login-header {
+        padding: 1rem;
+    }
+    
+    .login-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .login-form {
+        padding: 1.5rem;
+    }
+    
+    .admin-access-btn {
+        bottom: 10px;
+        right: 10px;
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+}

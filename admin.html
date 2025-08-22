@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Garden Rosas Decor</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="admin-body">
+    <header class="admin-header">
+        <div class="admin-container">
+            <div class="admin-logo">
+                <i class="fas fa-rose"></i>
+                <h1>Painel Administrativo</h1>
+            </div>
+            <div class="admin-actions">
+                <button class="session-timer" id="sessionTimer">
+                    <i class="fas fa-clock"></i>
+                    <span>--:--</span>
+                </button>
+                <button class="admin-logout-btn" onclick="adminLogout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Sair
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <div class="admin-container">
+            <!-- Dashboard Stats -->
+            <section class="dashboard-stats">
+                <h2><i class="fas fa-chart-bar"></i> Resumo Geral</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalProducts">0</h3>
+                            <p>Total de Produtos</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalCategories">7</h3>
+                            <p>Categorias</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-cubes"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalItems">0</h3>
+                            <p>Total de Itens</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalStockValue">R$ 0,00</h3>
+                            <p>Valor Total do Estoque</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Actions -->
+            <section class="quick-actions">
+                <h2><i class="fas fa-bolt"></i> Ações Rápidas</h2>
+                <div class="action-buttons">
+                    <button class="action-btn primary" onclick="showAddProductModal()">
+                        <i class="fas fa-plus"></i>
+                        Adicionar Produto
+                    </button>
+                    <button class="action-btn secondary" onclick="showBulkPriceModal()">
+                        <i class="fas fa-dollar-sign"></i>
+                        Alterar Preços
+                    </button>
+                    <button class="action-btn" onclick="exportData()">
+                        <i class="fas fa-download"></i>
+                        Exportar Dados
+                    </button>
+                    <button class="action-btn" onclick="backupData()">
+                        <i class="fas fa-save"></i>
+                        Backup
+                    </button>
+                </div>
+            </section>
+
+            <!-- Category Overview -->
+            <section class="category-overview">
+                <h2><i class="fas fa-layer-group"></i> Produtos por Categoria</h2>
+                <div class="category-grid" id="categoryGrid">
+                    <!-- Será preenchido dinamicamente -->
+                </div>
+            </section>
+
+            <!-- Products Management -->
+            <section class="products-management">
+                <div class="section-header">
+                    <h2><i class="fas fa-cogs"></i> Gerenciar Produtos</h2>
+                    <div class="search-controls">
+                        <div class="admin-search-bar">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="adminSearchInput" placeholder="Buscar produtos...">
+                        </div>
+                        <select id="adminCategoryFilter" class="admin-select">
+                            <option value="todos">Todas as Categorias</option>
+                            <option value="flores">Flores</option>
+                            <option value="velas">Velas</option>
+                            <option value="quadros">Quadros</option>
+                            <option value="santinhos">Santinhos</option>
+                            <option value="utensilios">Utensílios</option>
+                            <option value="artigos">Artigos</option>
+                            <option value="vasos">Vasos</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="products-table-container">
+                    <div id="adminProductsList" class="admin-products-list">
+                        <!-- Será preenchido dinamicamente -->
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal Adicionar/Editar Produto -->
+    <div id="productModal" class="admin-modal">
+        <div class="admin-modal-content">
+            <div class="admin-modal-header">
+                <h3 id="productModalTitle">
+                    <i class="fas fa-plus"></i>
+                    Adicionar Produto
+                </h3>
+                <button class="admin-close-btn" onclick="hideProductModal()">&times;</button>
+            </div>
+            
+            <form id="productForm" class="admin-form">
+                <input type="hidden" id="editProductId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productName">Nome do Produto:</label>
+                        <input type="text" id="productName" name="name" required 
+                               placeholder="Ex: Rosa Vermelha de Seda">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productCategory">Categoria:</label>
+                        <select id="productCategory" name="category" required class="admin-select">
+                            <option value="">Selecione uma categoria</option>
+                            <option value="flores">Flores</option>
+                            <option value="velas">Velas</option>
+                            <option value="quadros">Quadros</option>
+                            <option value="santinhos">Santinhos</option>
+                            <option value="utensilios">Utensílios</option>
+                            <option value="artigos">Artigos</option>
+                            <option value="vasos">Vasos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="productPrice">Preço (R$):</label>
+                        <input type="number" id="productPrice" name="price" step="0.01" min="0" required 
+                               placeholder="0,00">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productQuantity">Quantidade em Estoque:</label>
+                        <input type="number" id="productQuantity" name="quantity" min="0" required 
+                               placeholder="1" value="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Imagem do Produto:</label>
+                        <div class="image-upload-container">
+                            <div class="upload-options">
+                                <button type="button" class="upload-btn primary" onclick="triggerFileUpload()">
+                                    <i class="fas fa-camera"></i>
+                                    Da Galeria
+                                </button>
+                                <button type="button" class="upload-btn secondary" onclick="toggleUrlInput()">
+                                    <i class="fas fa-link"></i>
+                                    Por URL
+                                </button>
+                            </div>
+                            
+                            <input type="file" id="imageFile" accept="image/*" style="display: none" onchange="handleFileUpload(this)">
+                            <input type="url" id="productImage" name="image" placeholder="https://exemplo.com/imagem.jpg" style="display: none">
+                            
+                            <div id="uploadProgress" class="upload-progress" style="display: none">
+                                <div class="progress-bar">
+                                    <div class="progress-fill"></div>
+                                </div>
+                                <span class="progress-text">Enviando imagem...</span>
+                            </div>
+                            
+                            <div id="imagePreview" class="image-preview" style="display: none">
+                                <img id="previewImg" src="" alt="Preview">
+                                <button type="button" class="remove-image-btn" onclick="removeImage()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productDescription">Descrição:</label>
+                        <textarea id="productDescription" name="description" rows="4" required 
+                                  placeholder="Descreva o produto..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="admin-btn secondary" onclick="hideProductModal()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="admin-btn primary">
+                        <i class="fas fa-save"></i>
+                        Salvar Produto
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Alterar Preços -->
+    <div id="bulkPriceModal" class="admin-modal">
+        <div class="admin-modal-content">
+            <div class="admin-modal-header">
+                <h3>
+                    <i class="fas fa-dollar-sign"></i>
+                    Alterar Preços em Lote
+                </h3>
+                <button class="admin-close-btn" onclick="hideBulkPriceModal()">&times;</button>
+            </div>
+            
+            <form id="bulkPriceForm" class="admin-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bulkCategory">Categoria:</label>
+                        <select id="bulkCategory" class="admin-select">
+                            <option value="todos">Todas as Categorias</option>
+                            <option value="flores">Flores</option>
+                            <option value="velas">Velas</option>
+                            <option value="quadros">Quadros</option>
+                            <option value="santinhos">Santinhos</option>
+                            <option value="utensilios">Utensílios</option>
+                            <option value="artigos">Artigos</option>
+                            <option value="vasos">Vasos</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="priceChangeType">Tipo de Alteração:</label>
+                        <select id="priceChangeType" class="admin-select">
+                            <option value="percentage">Porcentagem (%)</option>
+                            <option value="fixed">Valor Fixo (R$)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="priceChangeValue">Valor:</label>
+                        <input type="number" id="priceChangeValue" step="0.01" required 
+                               placeholder="Ex: 10 para +10%">
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="admin-btn secondary" onclick="hideBulkPriceModal()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="admin-btn primary">
+                        <i class="fas fa-calculator"></i>
+                        Aplicar Alteração
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Proteção da página administrativa
+        if (!authManager.requireAuth()) {
+            window.location.href = 'index.html';
+        }
+    </script>
+    <script src="admin.js"></script>
+</body>
+</html>

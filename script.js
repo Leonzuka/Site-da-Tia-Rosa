@@ -9,7 +9,19 @@ class ProductManager {
     loadProducts() {
         const saved = localStorage.getItem('tiarosa_products');
         if (saved) {
-            return JSON.parse(saved);
+            const products = JSON.parse(saved);
+            // Migração automática: adiciona quantity se não existir
+            const migratedProducts = products.map(product => ({
+                ...product,
+                quantity: product.quantity !== undefined ? product.quantity : 1
+            }));
+            
+            // Salva produtos migrados se houve alteração
+            if (products.some(p => p.quantity === undefined)) {
+                localStorage.setItem('tiarosa_products', JSON.stringify(migratedProducts));
+            }
+            
+            return migratedProducts;
         }
         
         // Produtos de exemplo para demonstração
@@ -19,6 +31,7 @@ class ProductManager {
                 name: 'Rosa Vermelha de Seda',
                 category: 'flores',
                 price: 24.90,
+                quantity: 15,
                 description: 'Lindíssima rosa vermelha de seda premium, com pétalas realistas e haste flexível. Perfeita para decoração de ambientes ou arranjos especiais.',
                 image: 'https://m.media-amazon.com/images/I/61I49qc6NeL._AC_SX679_.jpg'
             },
@@ -27,6 +40,7 @@ class ProductManager {
                 name: 'Buquê de Rosas Brancas',
                 category: 'flores',
                 price: 45.00,
+                quantity: 8,
                 description: 'Elegante buquê com 12 rosas brancas de plástico, ideal para decoração de casamentos e eventos especiais.',
                 image: 'https://www.floresonline.com.br/media/catalog/product/a/l/alta-1112-1.webp'
             },
@@ -35,6 +49,7 @@ class ProductManager {
                 name: 'Lírio Amarelo de plástico',
                 category: 'flores',
                 price: 18.50,
+                quantity: 22,
                 description: 'Belo lírio amarelo de plástico com acabamento realista, perfeito para vasos e arranjos florais.',
                 image: 'https://acdn-us.mitiendanube.com/stores/001/049/883/products/56vzaed-1f96a250ecbb4886fd16177962972208-1024-1024.webp'
             },
@@ -43,6 +58,7 @@ class ProductManager {
                 name: 'Vela Branca',
                 category: 'velas',
                 price: 12.00,
+                quantity: 35,
                 description: 'Vela branca de cera natural branca, duração de 6 horas. Ideal para orações e momentos de reflexão.',
                 image: 'https://cdn.awsli.com.br/2500x2500/1810/1810998/produto/85595519/e2d98e0774.jpg'
             },
@@ -299,7 +315,8 @@ class ProductManager {
         const newProduct = {
             id: Date.now(),
             ...productData,
-            price: parseFloat(productData.price)
+            price: parseFloat(productData.price),
+            quantity: parseInt(productData.quantity) || 1
         };
         this.products.push(newProduct);
         this.saveProducts();
@@ -313,7 +330,8 @@ class ProductManager {
             this.products[index] = {
                 ...this.products[index],
                 ...productData,
-                price: parseFloat(productData.price)
+                price: parseFloat(productData.price),
+                quantity: parseInt(productData.quantity) || 1
             };
             this.saveProducts();
             return this.products[index];
@@ -381,19 +399,23 @@ document.addEventListener('DOMContentLoaded', function() {
 // Configuração de event listeners
 function setupEventListeners() {
     // Busca
-    searchInput.addEventListener('input', handleSearch);
+    if (searchInput) {
+        searchInput.addEventListener('input', handleSearch);
+    }
 
     // Filtros de categoria
-    categoryFilters.forEach(btn => {
-        btn.addEventListener('click', handleCategoryFilter);
-    });
+    if (categoryFilters) {
+        categoryFilters.forEach(btn => {
+            btn.addEventListener('click', handleCategoryFilter);
+        });
+    }
 
     // Navegação
-    navLinks.forEach(link => {
-        link.addEventListener('click', handleNavigation);
-    });
-
-    // Formulário removido
+    if (navLinks) {
+        navLinks.forEach(link => {
+            link.addEventListener('click', handleNavigation);
+        });
+    }
 
     // Scroll navigation
     window.addEventListener('scroll', updateActiveSection);
@@ -542,7 +564,117 @@ function updateActiveSection() {
     });
 }
 
-// Eventos removidos - não há mais formulário
+// Sistema de Login Administrativo
+function showLoginModal() {
+    const modal = document.getElementById('loginModal');
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    
+    // Foca no campo de usuário
+    setTimeout(() => {
+        document.getElementById('username').focus();
+    }, 300);
+}
+
+function hideLoginModal() {
+    const modal = document.getElementById('loginModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = 'auto';
+    
+    // Limpa o formulário
+    document.getElementById('loginForm').reset();
+    hideLoginError();
+}
+
+function togglePassword() {
+    const passwordField = document.getElementById('password');
+    const toggleBtn = document.querySelector('.toggle-password i');
+    
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        toggleBtn.className = 'fas fa-eye-slash';
+    } else {
+        passwordField.type = 'password';
+        toggleBtn.className = 'fas fa-eye';
+    }
+}
+
+function showLoginError(message) {
+    const errorDiv = document.getElementById('loginError');
+    errorDiv.textContent = message;
+    errorDiv.classList.add('show');
+}
+
+function hideLoginError() {
+    const errorDiv = document.getElementById('loginError');
+    errorDiv.classList.remove('show');
+}
+
+// Event Listeners para o Modal de Login
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('loginForm');
+    const loginModal = document.getElementById('loginModal');
+    
+    // Submissão do formulário de login
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showLoginError('Por favor, preencha todos os campos!');
+                return;
+            }
+            
+            // Tenta fazer login
+            const result = authManager.login(username, password);
+            
+            if (result.success) {
+                hideLoginModal();
+                // Redireciona para o admin
+                window.location.href = 'admin.html';
+            } else {
+                showLoginError(result.message);
+                // Limpa apenas a senha
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+            }
+        });
+    }
+    
+    // Fecha modal clicando fora dele
+    if (loginModal) {
+        loginModal.addEventListener('click', function(e) {
+            if (e.target === loginModal) {
+                hideLoginModal();
+            }
+        });
+    }
+    
+    // Fecha modal com ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && loginModal.classList.contains('show')) {
+            hideLoginModal();
+        }
+    });
+    
+    // Event listeners para eventos de autenticação
+    document.addEventListener('showLoginModal', showLoginModal);
+    
+    document.addEventListener('adminLoginSuccess', function() {
+        console.log('Login administrativo realizado com sucesso!');
+    });
+    
+    document.addEventListener('adminLogoutSuccess', function() {
+        console.log('Logout administrativo realizado com sucesso!');
+        // Redireciona para a página principal se estiver na área admin
+        if (window.location.pathname.includes('admin.html')) {
+            window.location.href = 'index.html';
+        }
+    });
+});
 
 // Utilitários
 function formatPrice(price) {
