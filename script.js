@@ -279,22 +279,35 @@ document.addEventListener('DOMContentLoaded', async function() {
     setupEventListeners();
     await initializeProducts();
     updateActiveSection();
+    
+    // Configuração do modal de login
+    setupLoginModal();
 });
 
 // Inicialização de produtos
 async function initializeProducts() {
+    console.log('🔄 Iniciando carregamento de produtos...');
+    
     // Mostrar loading se elemento existir
     if (productGrid) {
+        console.log('✅ ProductGrid encontrado, mostrando loading...');
         showProductsLoading();
         
         try {
             // Aguardar carregamento dos produtos
+            console.log('📡 Carregando produtos via ProductManager...');
             await productManager.loadProducts();
+            console.log('📦 Produtos carregados, quantidade:', productManager.products.length);
+            
+            console.log('🎨 Renderizando produtos...');
             await renderProducts();
+            console.log('✅ Produtos renderizados com sucesso!');
         } catch (error) {
             console.error('❌ Erro na inicialização:', error);
             showProductsError();
         }
+    } else {
+        console.log('⚠️ ProductGrid não encontrado na página');
     }
 }
 
@@ -325,14 +338,20 @@ function setupEventListeners() {
 
 // Renderização de produtos
 async function renderProducts() {
+    console.log('🎨 RenderProducts chamada');
+    
     // Verificar se o elemento existe (não existe na página admin)
     if (!productGrid) {
+        console.log('⚠️ ProductGrid não existe, saindo...');
         return;
     }
     
     const products = productManager.searchProducts(currentSearch, currentCategory);
+    console.log('📦 Produtos para renderizar:', products.length);
+    console.log('🔍 Filtros atuais - Search:', currentSearch, 'Category:', currentCategory);
     
     if (products.length === 0) {
+        console.log('⚠️ Nenhum produto encontrado, mostrando estado vazio');
         productGrid.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-box-open"></i>
@@ -343,7 +362,14 @@ async function renderProducts() {
         return;
     }
 
-    productGrid.innerHTML = products.map(product => createProductCard(product)).join('');
+    console.log('✅ Renderizando', products.length, 'produtos...');
+    const html = products.map(product => {
+        console.log('Criando card para produto:', product.name, 'Preço:', product.price);
+        return createProductCard(product);
+    }).join('');
+    
+    productGrid.innerHTML = html;
+    console.log('✅ HTML inserido no productGrid');
 }
 
 // Estados de carregamento
@@ -545,8 +571,8 @@ function hideLoginError() {
     errorDiv.classList.remove('show');
 }
 
-// Event Listeners para o Modal de Login
-document.addEventListener('DOMContentLoaded', function() {
+// Configuração do Modal de Login
+function setupLoginModal() {
     const loginForm = document.getElementById('loginForm');
     const loginModal = document.getElementById('loginModal');
     
@@ -609,11 +635,12 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = 'index.html';
         }
     });
-});
+}
 
 // Utilitários
 function formatPrice(price) {
-    return `R$ ${price.toFixed(2).replace('.', ',')}`;
+    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+    return `R$ ${(numPrice || 0).toFixed(2).replace('.', ',')}`;
 }
 
 function validateForm(data) {
