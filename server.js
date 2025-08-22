@@ -178,21 +178,83 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
+// ================== HEALTH CHECK ==================
+
+// Endpoint de health check para Railway
+app.get('/health', async (req, res) => {
+    const status = {
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV || 'development',
+        port: PORT,
+        services: {
+            database: false,
+            cloudinary: false
+        },
+        database_config: {
+            has_database_url: !!process.env.DATABASE_URL,
+            has_mysql_host: !!(process.env.MYSQL_HOST || process.env.DB_HOST),
+            has_mysql_user: !!(process.env.MYSQL_USER || process.env.DB_USER),
+            has_mysql_database: !!(process.env.MYSQL_DATABASE || process.env.DB_NAME)
+        }
+    };
+    
+    try {
+        // Testar conexão com banco
+        const dbOk = await testConnection();
+        status.services.database = dbOk;
+        
+        // Verificar configuração do Cloudinary
+        status.services.cloudinary = !!(
+            process.env.CLOUDINARY_CLOUD_NAME && 
+            process.env.CLOUDINARY_API_KEY && 
+            process.env.CLOUDINARY_API_SECRET
+        );
+        
+        // Status geral
+        const allServicesOk = status.services.database && status.services.cloudinary;
+        
+        res.status(allServicesOk ? 200 : 503).json(status);
+        
+    } catch (error) {
+        status.status = 'error';
+        status.error = error.message;
+        res.status(503).json(status);
+    }
+});
+
+// Endpoint simples para verificar se o servidor está vivo
+app.get('/ping', (req, res) => {
+    res.json({ 
+        message: 'pong', 
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
 // ================== APIs DE PRODUTOS ==================
 
 // Listar todos os produtos
 app.get('/api/products', async (req, res) => {
     try {
+        console.log('📦 Requisição para /api/products:', req.query);
+        
         const { category, search } = req.query;
         let products;
         
         if (search) {
+            console.log('🔍 Buscando produtos com termo:', search);
             products = await ProductDB.search(search);
         } else if (category && category !== 'todos') {
+            console.log('📋 Buscando produtos da categoria:', category);
             products = await ProductDB.getByCategory(category);
         } else {
+            console.log('📦 Buscando todos os produtos');
             products = await ProductDB.getAll();
         }
+        
+        console.log(`✅ Encontrados ${products.length} produtos`);
         
         res.json({
             success: true,
@@ -200,10 +262,23 @@ app.get('/api/products', async (req, res) => {
             total: products.length
         });
     } catch (error) {
-        console.error('Erro ao buscar produtos:', error);
+        console.error('❌ Erro ao buscar produtos:', error.message);
+        console.error('Código do erro:', error.code);
+        console.error('Stack trace:', error.stack);
+        
+        // Diagnóstico específico para erros de conexão
+        if (error.code === 'ECONNREFUSED') {
+            console.error('🔌 Diagnóstico: Erro de conexão com banco de dados');
+            console.error('   - Verificar se o MySQL está rodando no Railway');
+            console.error('   - Confirmar variáveis de ambiente DATABASE_URL ou MYSQL_*');
+            console.error('   - Verificar se o serviço de banco está ativo');
+        }
+        
         res.status(500).json({
             success: false,
-            message: 'Erro interno do servidor: ' + error.message
+            message: 'Erro ao conectar com banco de dados. Verifique os logs.',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
+            code: error.code
         });
     }
 });
@@ -411,8 +486,18 @@ app.use((error, req, res, next) => {
 // Iniciar servidor
 async function startServer() {
     try {
+        console.log('🚀 Iniciando servidor Garden Rosas Decor...');
+        console.log('🌍 Ambiente:', process.env.NODE_ENV || 'development');
+        console.log('🔧 Porta:', PORT);
+        
+        // Verificar variáveis de ambiente essenciais
+        console.log('\n📋 Verificando configurações:');
+        console.log('Cloudinary Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME ? '✅' : '❌');
+        console.log('Cloudinary API Key:', process.env.CLOUDINARY_API_KEY ? '✅' : '❌');
+        console.log('Cloudinary API Secret:', process.env.CLOUDINARY_API_SECRET ? '✅' : '❌');
+        
         // Testar conexão com banco de dados
-        console.log('📡 Testando conexão com MySQL...');
+        console.log('\n📡 Testando conexão com MySQL...');
         const dbOk = await testConnection();
         
         if (dbOk) {
@@ -421,19 +506,49 @@ async function startServer() {
             await initializeTables();
             console.log('✅ Banco de dados pronto!');
         } else {
-            console.log('⚠️ Banco de dados indisponível. APIs de produtos não funcionarão.');
+            console.log('⚠️ ATENÇÃO: Banco de dados indisponível!');
+            console.log('   - APIs de produtos não funcionarão');
+            console.log('   - Verifique as variáveis de ambiente do Railway');
+            console.log('   - Confirme se o banco MySQL está ativo no Railway');
         }
         
         // Iniciar servidor
-        app.listen(PORT, () => {
-            console.log(`🚀 Servidor rodando na porta ${PORT}`);
-            console.log(`☁️ Imagens serão enviadas para Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME}`);
+        const server = app.listen(PORT, '0.0.0.0', () => {
+            console.log('\n🎉 Servidor iniciado com sucesso!');
+            console.log(`🚀 Rodando na porta: ${PORT}`);
+            console.log(`☁️ Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME || 'Não configurado'}`);
             console.log(`🗄️ Banco de dados: ${dbOk ? '✅ Conectado' : '❌ Desconectado'}`);
-            console.log(`📁 Pasta local de fallback: ${imagesDir}`);
-            console.log(`🌐 Acesse: http://localhost:${PORT}`);
+            console.log(`📁 Imagens locais: ${imagesDir}`);
+            
+            if (process.env.NODE_ENV === 'production') {
+                console.log(`🌐 URL de produção disponível`);
+            } else {
+                console.log(`🌐 Desenvolvimento: http://localhost:${PORT}`);
+            }
+            
+            console.log('\n📝 Logs em tempo real:');
         });
+        
+        // Graceful shutdown
+        process.on('SIGINT', () => {
+            console.log('\n🛑 Recebido SIGINT. Fechando servidor...');
+            server.close(() => {
+                console.log('✅ Servidor fechado com sucesso');
+                process.exit(0);
+            });
+        });
+        
+        process.on('SIGTERM', () => {
+            console.log('\n🛑 Recebido SIGTERM. Fechando servidor...');
+            server.close(() => {
+                console.log('✅ Servidor fechado com sucesso');
+                process.exit(0);
+            });
+        });
+        
     } catch (error) {
-        console.error('❌ Erro ao iniciar servidor:', error);
+        console.error('❌ ERRO CRÍTICO ao iniciar servidor:', error);
+        console.error('Stack trace:', error.stack);
         process.exit(1);
     }
 }

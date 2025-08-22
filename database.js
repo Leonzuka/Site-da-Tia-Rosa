@@ -7,16 +7,46 @@ let pool = null;
 function createPool() {
     if (!pool) {
         try {
-            pool = mysql.createPool({
-                uri: process.env.DATABASE_URL,
-                connectionLimit: 10,
-                acquireTimeout: 60000,
-                timeout: 60000,
-                reconnect: true,
-                charset: 'utf8mb4',
-                timezone: '-03:00', // Horário de Brasília
-                ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-            });
+            // Configuração de conexão - prioriza DATABASE_URL do Railway
+            let config;
+            
+            if (process.env.DATABASE_URL) {
+                console.log('📡 Usando DATABASE_URL do Railway');
+                config = {
+                    uri: process.env.DATABASE_URL,
+                    connectionLimit: 10,
+                    acquireTimeout: 60000,
+                    timeout: 60000,
+                    reconnect: true,
+                    charset: 'utf8mb4',
+                    timezone: '-03:00',
+                    ssl: { rejectUnauthorized: false } // Railway sempre usa SSL
+                };
+            } else {
+                // Fallback para variáveis individuais do Railway
+                console.log('📡 Usando variáveis individuais do Railway');
+                console.log('Host:', process.env.MYSQL_HOST || process.env.DB_HOST || 'localhost');
+                console.log('Port:', process.env.MYSQL_PORT || process.env.DB_PORT || 3306);
+                console.log('User:', process.env.MYSQL_USER || process.env.DB_USER || 'root');
+                console.log('Database:', process.env.MYSQL_DATABASE || process.env.DB_NAME || 'railway');
+                
+                config = {
+                    host: process.env.MYSQL_HOST || process.env.DB_HOST || 'localhost',
+                    port: parseInt(process.env.MYSQL_PORT || process.env.DB_PORT || '3306'),
+                    user: process.env.MYSQL_USER || process.env.DB_USER || 'root',
+                    password: process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD || '',
+                    database: process.env.MYSQL_DATABASE || process.env.DB_NAME || 'railway',
+                    connectionLimit: 10,
+                    acquireTimeout: 60000,
+                    timeout: 60000,
+                    reconnect: true,
+                    charset: 'utf8mb4',
+                    timezone: '-03:00',
+                    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+                };
+            }
+            
+            pool = mysql.createPool(config);
             
             console.log('✅ Pool de conexões MySQL criado com sucesso');
         } catch (error) {
@@ -29,14 +59,25 @@ function createPool() {
 
 // Função para executar queries
 async function query(sql, params = []) {
+    let connection = null;
     try {
-        const connection = createPool();
+        connection = createPool();
         const [results] = await connection.execute(sql, params);
         return results;
     } catch (error) {
-        console.error('❌ Erro na query:', error);
+        console.error('❌ Erro na query:', error.message);
+        console.error('Código do erro:', error.code);
         console.error('SQL:', sql);
         console.error('Params:', params);
+        
+        // Logs específicos para debug de conexão
+        if (error.code === 'ECONNREFUSED') {
+            console.error('🔌 Erro de conexão recusada - verificar:');
+            console.error('- Variáveis de ambiente do banco de dados');
+            console.error('- Status do banco de dados no Railway');
+            console.error('- Configurações de rede/firewall');
+        }
+        
         throw error;
     }
 }
@@ -44,11 +85,23 @@ async function query(sql, params = []) {
 // Função para testar conexão
 async function testConnection() {
     try {
+        console.log('🔍 Testando conexão com banco de dados...');
+        
+        // Log das variáveis de ambiente (sem mostrar senhas)
+        console.log('Variables de ambiente disponíveis:');
+        console.log('DATABASE_URL:', process.env.DATABASE_URL ? '✅ Definida' : '❌ Não definida');
+        console.log('MYSQL_HOST:', process.env.MYSQL_HOST || process.env.DB_HOST || '❌ Não definida');
+        console.log('MYSQL_PORT:', process.env.MYSQL_PORT || process.env.DB_PORT || '❌ Não definida');
+        console.log('MYSQL_USER:', process.env.MYSQL_USER || process.env.DB_USER || '❌ Não definida');
+        console.log('MYSQL_DATABASE:', process.env.MYSQL_DATABASE || process.env.DB_NAME || '❌ Não definida');
+        console.log('NODE_ENV:', process.env.NODE_ENV || 'development');
+        
         await query('SELECT 1 as test');
         console.log('✅ Conexão com MySQL testada com sucesso');
         return true;
     } catch (error) {
-        console.error('❌ Erro ao testar conexão com MySQL:', error);
+        console.error('❌ Erro ao testar conexão com MySQL:', error.message);
+        console.error('Detalhes completos do erro:', error);
         return false;
     }
 }
