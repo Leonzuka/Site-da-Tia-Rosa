@@ -10,10 +10,12 @@ function createPool() {
             // Configuração de conexão - prioriza DATABASE_URL do Railway
             let config;
             
-            if (process.env.DATABASE_URL) {
-                console.log('📡 Usando DATABASE_URL do Railway');
+            if (process.env.DATABASE_URL || process.env.MYSQL_URL) {
+                const dbUrl = process.env.DATABASE_URL || process.env.MYSQL_URL;
+                console.log('📡 Usando', process.env.DATABASE_URL ? 'DATABASE_URL' : 'MYSQL_URL', 'do Railway');
+                console.log('🔗 URL:', dbUrl.replace(/:[^:@]*@/, ':***@')); // Ocultar senha no log
                 config = {
-                    uri: process.env.DATABASE_URL,
+                    uri: dbUrl,
                     connectionLimit: 10,
                     charset: 'utf8mb4',
                     timezone: '-03:00',
@@ -99,6 +101,7 @@ async function testConnection() {
         // Log das variáveis de ambiente (sem mostrar senhas)
         console.log('Variables de ambiente disponíveis:');
         console.log('DATABASE_URL:', process.env.DATABASE_URL ? '✅ Definida' : '❌ Não definida');
+        console.log('MYSQL_URL:', process.env.MYSQL_URL ? '✅ Definida' : '❌ Não definida');
         console.log('MYSQLHOST:', process.env.MYSQLHOST ? '✅ Definida' : '❌ Não definida');
         console.log('MYSQLPORT:', process.env.MYSQLPORT || '❌ Não definida');
         console.log('MYSQLUSER:', process.env.MYSQLUSER ? '✅ Definida' : '❌ Não definida');

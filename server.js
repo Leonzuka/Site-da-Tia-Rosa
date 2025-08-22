@@ -194,6 +194,7 @@ app.get('/health', async (req, res) => {
         },
         database_config: {
             has_database_url: !!process.env.DATABASE_URL,
+            has_mysql_url: !!process.env.MYSQL_URL,
             has_mysqlhost: !!process.env.MYSQLHOST,
             has_mysqlport: !!process.env.MYSQLPORT,
             has_mysqluser: !!process.env.MYSQLUSER,
