@@ -149,6 +149,16 @@ async function initializeTables() {
     }
 }
 
+// Helper para normalizar produtos
+function normalizeProduct(product) {
+    if (!product) return null;
+    return {
+        ...product,
+        price: parseFloat(product.price) || 0,
+        quantity: parseInt(product.quantity) || 1
+    };
+}
+
 // Funções específicas para produtos
 const ProductDB = {
     // Buscar todos os produtos
@@ -159,7 +169,8 @@ const ProductDB = {
             FROM products 
             ORDER BY created_at DESC
         `;
-        return await query(sql);
+        const results = await query(sql);
+        return results.map(normalizeProduct);
     },
     
     // Buscar produto por ID
@@ -171,7 +182,7 @@ const ProductDB = {
             WHERE id = ?
         `;
         const results = await query(sql, [id]);
-        return results[0] || null;
+        return normalizeProduct(results[0]);
     },
     
     // Criar novo produto
@@ -181,7 +192,7 @@ const ProductDB = {
             INSERT INTO products (name, category, price, quantity, description, image)
             VALUES (?, ?, ?, ?, ?, ?)
         `;
-        const result = await query(sql, [name, category, price, quantity || 1, description, image]);
+        const result = await query(sql, [name, category, parseFloat(price) || 0, parseInt(quantity) || 1, description, image]);
         return await this.getById(result.insertId);
     },
     
@@ -193,7 +204,7 @@ const ProductDB = {
             SET name = ?, category = ?, price = ?, quantity = ?, description = ?, image = ?
             WHERE id = ?
         `;
-        await query(sql, [name, category, price, quantity || 1, description, image, id]);
+        await query(sql, [name, category, parseFloat(price) || 0, parseInt(quantity) || 1, description, image, id]);
         return await this.getById(id);
     },
     
@@ -216,7 +227,8 @@ const ProductDB = {
             WHERE category = ?
             ORDER BY name
         `;
-        return await query(sql, [category]);
+        const results = await query(sql, [category]);
+        return results.map(normalizeProduct);
     },
     
     // Buscar produtos por nome
@@ -229,7 +241,8 @@ const ProductDB = {
             ORDER BY name
         `;
         const searchPattern = `%${searchTerm}%`;
-        return await query(sql, [searchPattern, searchPattern]);
+        const results = await query(sql, [searchPattern, searchPattern]);
+        return results.map(normalizeProduct);
     },
     
     // Atualizar preços em lote por categoria

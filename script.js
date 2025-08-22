@@ -387,7 +387,11 @@ function createProductCard(product) {
         ? `<img src="${product.image}" alt="${product.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">`
         : '';
 
-    const whatsappMessage = encodeURIComponent(`Olá! Tenho interesse no produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}`);
+    // Garantir que o preço seja um número
+    const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
+    const formattedPrice = (price || 0).toFixed(2).replace('.', ',');
+    
+    const whatsappMessage = encodeURIComponent(`Olá! Tenho interesse no produto: *${product.name}* - R$ ${formattedPrice}`);
 
     return `
         <div class="product-card" data-category="${product.category}">
@@ -398,7 +402,7 @@ function createProductCard(product) {
             </div>
             <div class="product-info">
                 <h3 class="product-name">${product.name}</h3>
-                <div class="product-price">R$ ${product.price.toFixed(2).replace('.', ',')}</div>
+                <div class="product-price">R$ ${formattedPrice}</div>
                 <p class="product-description">${product.description}</p>
                 <a href="https://wa.me/558799275516?text=${whatsappMessage}" class="product-whatsapp" target="_blank">
                     <i class="fab fa-whatsapp"></i>

@@ -73,7 +73,10 @@ class AdminManager {
         document.getElementById('totalItems').textContent = totalItems;
         
         // Valor total do estoque (preço × quantidade)
-        const totalStockValue = products.reduce((sum, p) => sum + (p.price * (p.quantity || 1)), 0);
+        const totalStockValue = products.reduce((sum, p) => {
+            const price = typeof p.price === 'string' ? parseFloat(p.price) : p.price;
+            return sum + ((price || 0) * (p.quantity || 1));
+        }, 0);
         document.getElementById('totalStockValue').textContent = this.formatPrice(totalStockValue);
     }
 
@@ -494,7 +497,9 @@ class AdminManager {
     }
 
     formatPrice(price) {
-        return `R$ ${price.toFixed(2).replace('.', ',')}`;
+        // Garantir que o preço seja um número
+        const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+        return `R$ ${(numPrice || 0).toFixed(2).replace('.', ',')}`;
     }
 
     formatDate(date) {
