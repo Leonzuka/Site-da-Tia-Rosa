@@ -7,17 +7,48 @@ class AdminManager {
     }
 
     // Inicializa o sistema administrativo
-    init() {
+    async init() {
         // Verifica autenticação
         if (!requireAuth()) {
             return;
         }
 
         this.setupEventListeners();
-        this.updateDashboard();
         this.updateSessionTimer();
-        this.renderProductsList();
-        this.updateCategoryOverview();
+        
+        // Aguardar carregamento dos produtos antes de renderizar
+        await this.initializeProductsData();
+    }
+    
+    // Inicializa dados de produtos
+    async initializeProductsData() {
+        try {
+            console.log('🔄 [Admin] Carregando produtos...');
+            
+            // Aguardar carregamento dos produtos via ProductManager
+            await this.productManager.loadProducts();
+            
+            console.log('✅ [Admin] Produtos carregados:', this.productManager.products.length);
+            
+            // Agora que os produtos estão carregados, atualizar dashboard
+            this.updateDashboard();
+            
+            // Renderizar com os valores atuais dos filtros
+            const categoryFilter = document.getElementById('adminCategoryFilter');
+            const searchInput = document.getElementById('adminSearchInput');
+            const currentCategory = categoryFilter ? categoryFilter.value : 'todos';
+            const currentSearch = searchInput ? searchInput.value : '';
+            
+            console.log('🔄 [Admin] Renderizando com filtros atuais:', currentCategory, currentSearch);
+            this.renderProductsList(currentCategory === 'todos' ? null : currentCategory, currentSearch);
+            
+            this.updateCategoryOverview();
+            
+        } catch (error) {
+            console.error('❌ [Admin] Erro ao carregar produtos:', error);
+            // Mostrar mensagem de erro no admin
+            this.showMessage('Erro ao carregar produtos: ' + error.message, 'error');
+        }
     }
 
     // Configura event listeners
@@ -146,14 +177,22 @@ class AdminManager {
 
     // Renderiza lista de produtos
     renderProductsList(filterCategory = null, searchQuery = '') {
+        console.log('🎨 [Admin] RenderProductsList chamada');
+        console.log('📊 [Admin] FilterCategory:', filterCategory, 'SearchQuery:', searchQuery);
+        
         const productsList = document.getElementById('adminProductsList');
-        if (!productsList) return;
+        if (!productsList) {
+            console.log('⚠️ [Admin] adminProductsList não encontrado');
+            return;
+        }
 
         let products = this.productManager.products;
+        console.log('📦 [Admin] Total de produtos disponíveis:', products.length);
 
         // Aplica filtros
         if (filterCategory && filterCategory !== 'todos') {
             products = products.filter(p => p.category === filterCategory);
+            console.log('🔍 [Admin] Após filtro de categoria:', products.length);
         }
 
         if (searchQuery) {
@@ -162,10 +201,12 @@ class AdminManager {
                 p.name.toLowerCase().includes(query) ||
                 p.description.toLowerCase().includes(query)
             );
+            console.log('🔍 [Admin] Após filtro de busca:', products.length);
         }
 
         // Ordena por nome
         products.sort((a, b) => a.name.localeCompare(b.name));
+        console.log('✅ [Admin] Produtos finais para renderizar:', products.length);
 
         if (products.length === 0) {
             productsList.innerHTML = `
@@ -178,7 +219,9 @@ class AdminManager {
             return;
         }
 
-        productsList.innerHTML = products.map(product => this.createAdminProductCard(product)).join('');
+        const html = products.map(product => this.createAdminProductCard(product)).join('');
+        productsList.innerHTML = html;
+        console.log('✅ [Admin] HTML inserido no adminProductsList, produtos renderizados:', products.length);
     }
 
     // Cria card de produto para o admin
