@@ -2,30 +2,9 @@
 
 Site para a loja de flores artificiais e artigos religiosos com sistema administrativo e upload de imagens.
 
-## 🚀 Como Rodar Localmente
-
-### 1. Instalar Dependências
-```bash
-npm install
-```
-
-### 2. Iniciar o Servidor
-```bash
-npm start
-```
-
-### 3. Acessar o Site
-- **Site principal**: http://localhost:3000
-- **Painel admin**: http://localhost:3000/admin
-
-## 🔐 Login Administrativo
-- **Usuário**: `Rosinha`
-- **Senha**: `324470`
-
 ## 📁 Estrutura do Projeto
 ```
 Site-da-Tia-Rosa/
-├── images/products/          # Imagens dos produtos (criada automaticamente)
 ├── index.html               # Página principal
 ├── admin.html               # Painel administrativo
 ├── script.js                # Lógica do site principal
@@ -44,17 +23,6 @@ Site-da-Tia-Rosa/
 - Validação de arquivos (apenas imagens, máximo 5MB)
 - Preview instantâneo
 - Fallback para URLs externas
-
-## 🚀 Deploy no Railway
-1. Conectar repositório no Railway
-2. **Build Command**: `npm install`
-3. **Start Command**: `npm start`
-4. Railway detecta automaticamente a porta
-
-## 🛠️ APIs Disponíveis
-- `POST /api/upload` - Upload de imagem
-- `GET /api/images` - Listar imagens
-- `DELETE /api/images/:fileName` - Deletar imagem
 
 ## 📱 Mobile-First
 Todo o design foi pensado para mobile primeiro, incluindo:

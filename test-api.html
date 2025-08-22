@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de API - Garden Rosas Decor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+        button {
+            background: #8B4A6B;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #6d3653;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste da Migração - Garden Rosas Decor</h1>
+    <p>Esta página testa se a migração do localStorage para MySQL + Cloudinary foi bem-sucedida.</p>
+
+    <div class="test-result info">
+        <h3>📊 Status:</h3>
+        <div id="status">Iniciando testes...</div>
+    </div>
+
+    <div class="test-result" id="apiTest">
+        <h3>🔌 Teste da API</h3>
+        <div id="apiResult">Aguardando...</div>
+    </div>
+
+    <div class="test-result" id="frontendTest">
+        <h3>🎨 Teste do Frontend</h3>
+        <div id="frontendResult">Aguardando...</div>
+    </div>
+
+    <div class="test-result" id="performanceTest">
+        <h3>⚡ Teste de Performance</h3>
+        <div id="performanceResult">Aguardando...</div>
+    </div>
+
+    <button onclick="runTests()">🚀 Executar Testes</button>
+    <button onclick="location.href='index.html'">🏠 Voltar ao Site</button>
+    <button onclick="location.href='admin.html'">⚙️ Admin Panel</button>
+
+    <script>
+        let testResults = {
+            api: false,
+            frontend: false,
+            performance: 0
+        };
+
+        async function runTests() {
+            document.getElementById('status').innerHTML = '🔄 Executando testes...';
+            
+            // Teste 1: API
+            await testAPI();
+            
+            // Teste 2: Frontend
+            await testFrontend();
+            
+            // Teste 3: Performance
+            await testPerformance();
+            
+            // Resultado final
+            updateFinalStatus();
+        }
+
+        async function testAPI() {
+            const resultDiv = document.getElementById('apiResult');
+            const testDiv = document.getElementById('apiTest');
+            
+            try {
+                resultDiv.innerHTML = '🔄 Testando conexão com API...';
+                
+                const startTime = performance.now();
+                const response = await fetch('/api/products');
+                const endTime = performance.now();
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.products) {
+                    testResults.api = true;
+                    testDiv.className = 'test-result success';
+                    resultDiv.innerHTML = `
+                        ✅ <strong>API funcionando!</strong><br>
+                        • Produtos carregados: ${data.products.length}<br>
+                        • Tempo de resposta: ${Math.round(endTime - startTime)}ms<br>
+                        • Status: ${data.success ? 'Sucesso' : 'Erro'}
+                        <details>
+                            <summary>Ver dados</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    `;
+                } else {
+                    throw new Error('Resposta da API inválida');
+                }
+                
+            } catch (error) {
+                testDiv.className = 'test-result error';
+                resultDiv.innerHTML = `
+                    ❌ <strong>Erro na API:</strong><br>
+                    ${error.message}
+                `;
+            }
+        }
+
+        async function testFrontend() {
+            const resultDiv = document.getElementById('frontendResult');
+            const testDiv = document.getElementById('frontendTest');
+            
+            try {
+                resultDiv.innerHTML = '🔄 Testando ProductManager...';
+                
+                // Simular ProductManager
+                const startTime = performance.now();
+                
+                // Verificar se consegue criar ProductManager
+                if (typeof ProductManager !== 'undefined') {
+                    const manager = new ProductManager();
+                    
+                    // Aguardar carregamento
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    const endTime = performance.now();
+                    
+                    testResults.frontend = true;
+                    testDiv.className = 'test-result success';
+                    resultDiv.innerHTML = `
+                        ✅ <strong>Frontend funcionando!</strong><br>
+                        • ProductManager: Criado com sucesso<br>
+                        • Produtos carregados: ${manager.products?.length || 0}<br>
+                        • Tempo de inicialização: ${Math.round(endTime - startTime)}ms<br>
+                        • Cache: ${localStorage.getItem('tiarosa_products_cache') ? 'Disponível' : 'Vazio'}
+                    `;
+                } else {
+                    throw new Error('ProductManager não está disponível');
+                }
+                
+            } catch (error) {
+                testDiv.className = 'test-result error';
+                resultDiv.innerHTML = `
+                    ❌ <strong>Erro no Frontend:</strong><br>
+                    ${error.message}
+                `;
+            }
+        }
+
+        async function testPerformance() {
+            const resultDiv = document.getElementById('performanceResult');
+            const testDiv = document.getElementById('performanceTest');
+            
+            try {
+                resultDiv.innerHTML = '🔄 Medindo performance...';
+                
+                const tests = [];
+                
+                // Teste múltiplas requisições
+                for (let i = 0; i < 3; i++) {
+                    const start = performance.now();
+                    const response = await fetch('/api/products');
+                    const end = performance.now();
+                    
+                    if (response.ok) {
+                        tests.push(end - start);
+                    }
+                }
+                
+                if (tests.length > 0) {
+                    const avgTime = tests.reduce((a, b) => a + b) / tests.length;
+                    testResults.performance = avgTime;
+                    
+                    let performanceClass = 'success';
+                    let performanceText = 'Excelente';
+                    
+                    if (avgTime > 1000) {
+                        performanceClass = 'error';
+                        performanceText = 'Lento';
+                    } else if (avgTime > 500) {
+                        performanceClass = 'info';
+                        performanceText = 'Moderado';
+                    }
+                    
+                    testDiv.className = `test-result ${performanceClass}`;
+                    resultDiv.innerHTML = `
+                        ⚡ <strong>Performance: ${performanceText}</strong><br>
+                        • Tempo médio: ${Math.round(avgTime)}ms<br>
+                        • Melhor tempo: ${Math.round(Math.min(...tests))}ms<br>
+                        • Pior tempo: ${Math.round(Math.max(...tests))}ms<br>
+                        • Testes realizados: ${tests.length}
+                    `;
+                } else {
+                    throw new Error('Nenhum teste de performance foi concluído');
+                }
+                
+            } catch (error) {
+                testDiv.className = 'test-result error';
+                resultDiv.innerHTML = `
+                    ❌ <strong>Erro na Performance:</strong><br>
+                    ${error.message}
+                `;
+            }
+        }
+
+        function updateFinalStatus() {
+            const statusDiv = document.getElementById('status');
+            const totalTests = Object.keys(testResults).length;
+            const passedTests = Object.values(testResults).filter(r => r === true || (typeof r === 'number' && r > 0)).length;
+            
+            if (passedTests === totalTests) {
+                statusDiv.innerHTML = `
+                    🎉 <strong>Migração bem-sucedida!</strong><br>
+                    ✅ Todos os testes passaram (${passedTests}/${totalTests})<br>
+                    🚀 Sistema pronto para produção!
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    ⚠️ <strong>Migração parcial</strong><br>
+                    📊 Testes: ${passedTests}/${totalTests} passaram<br>
+                    🔧 Verificar falhas acima
+                `;
+            }
+        }
+
+        // Executar testes automaticamente ao carregar a página
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 500);
+        });
+    </script>
+</body>
+</html>
