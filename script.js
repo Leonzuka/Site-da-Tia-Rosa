@@ -423,6 +423,11 @@ function setupEventListeners() {
 
 // Renderização de produtos
 function renderProducts() {
+    // Verificar se o elemento existe (não existe na página admin)
+    if (!productGrid) {
+        return;
+    }
+    
     const products = productManager.searchProducts(currentSearch, currentCategory);
     
     if (products.length === 0) {

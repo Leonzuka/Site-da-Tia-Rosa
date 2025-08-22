@@ -398,6 +398,9 @@ class AdminManager {
         document.getElementById('productForm').reset();
         this.currentEditId = null;
         
+        // Reset image state
+        removeImage();
+        
         // Reset modal title
         document.getElementById('productModalTitle').innerHTML = `
             <i class="fas fa-plus"></i>
@@ -589,10 +592,12 @@ function toggleUrlInput() {
     const urlInput = document.getElementById('productImage');
     const preview = document.getElementById('imagePreview');
     
-    if (urlInput.style.display === 'none') {
+    if (urlInput.style.display === 'none' || urlInput.style.display === '') {
         urlInput.style.display = 'block';
         urlInput.focus();
-        preview.style.display = 'none';
+        if (preview) {
+            preview.style.display = 'none';
+        }
     } else {
         urlInput.style.display = 'none';
     }
