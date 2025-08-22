@@ -15,34 +15,43 @@ function createPool() {
                 config = {
                     uri: process.env.DATABASE_URL,
                     connectionLimit: 10,
-                    acquireTimeout: 60000,
-                    timeout: 60000,
-                    reconnect: true,
                     charset: 'utf8mb4',
                     timezone: '-03:00',
                     ssl: { rejectUnauthorized: false } // Railway sempre usa SSL
                 };
             } else {
                 // Fallback para variáveis individuais do Railway
+                // Railway usa MYSQLHOST, MYSQLPORT, MYSQLUSER, MYSQLPASSWORD, MYSQLDATABASE
                 console.log('📡 Usando variáveis individuais do Railway');
-                console.log('Host:', process.env.MYSQL_HOST || process.env.DB_HOST || 'localhost');
-                console.log('Port:', process.env.MYSQL_PORT || process.env.DB_PORT || 3306);
-                console.log('User:', process.env.MYSQL_USER || process.env.DB_USER || 'root');
-                console.log('Database:', process.env.MYSQL_DATABASE || process.env.DB_NAME || 'railway');
+                const host = process.env.MYSQLHOST || process.env.MYSQL_HOST || process.env.DB_HOST;
+                const port = process.env.MYSQLPORT || process.env.MYSQL_PORT || process.env.DB_PORT || '3306';
+                const user = process.env.MYSQLUSER || process.env.MYSQL_USER || process.env.DB_USER || 'root';
+                const password = process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD || '';
+                const database = process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || process.env.DB_NAME || 'railway';
+                
+                console.log('Host:', host || 'NÃO DEFINIDO');
+                console.log('Port:', port);
+                console.log('User:', user);
+                console.log('Database:', database);
+                console.log('Password:', password ? '✅ DEFINIDA' : '❌ NÃO DEFINIDA');
+                
+                if (!host) {
+                    throw new Error('❌ Nenhuma variável de host encontrada. Verifique MYSQLHOST, MYSQL_HOST ou DB_HOST no Railway.');
+                }
                 
                 config = {
-                    host: process.env.MYSQL_HOST || process.env.DB_HOST || 'localhost',
-                    port: parseInt(process.env.MYSQL_PORT || process.env.DB_PORT || '3306'),
-                    user: process.env.MYSQL_USER || process.env.DB_USER || 'root',
-                    password: process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD || '',
-                    database: process.env.MYSQL_DATABASE || process.env.DB_NAME || 'railway',
+                    host: host,
+                    port: parseInt(port),
+                    user: user,
+                    password: password,
+                    database: database,
                     connectionLimit: 10,
-                    acquireTimeout: 60000,
-                    timeout: 60000,
-                    reconnect: true,
                     charset: 'utf8mb4',
                     timezone: '-03:00',
-                    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+                    ssl: process.env.NODE_ENV === 'production' ? { 
+                        rejectUnauthorized: false,
+                        minVersion: 'TLSv1.2'
+                    } : false
                 };
             }
             
@@ -90,10 +99,11 @@ async function testConnection() {
         // Log das variáveis de ambiente (sem mostrar senhas)
         console.log('Variables de ambiente disponíveis:');
         console.log('DATABASE_URL:', process.env.DATABASE_URL ? '✅ Definida' : '❌ Não definida');
-        console.log('MYSQL_HOST:', process.env.MYSQL_HOST || process.env.DB_HOST || '❌ Não definida');
-        console.log('MYSQL_PORT:', process.env.MYSQL_PORT || process.env.DB_PORT || '❌ Não definida');
-        console.log('MYSQL_USER:', process.env.MYSQL_USER || process.env.DB_USER || '❌ Não definida');
-        console.log('MYSQL_DATABASE:', process.env.MYSQL_DATABASE || process.env.DB_NAME || '❌ Não definida');
+        console.log('MYSQLHOST:', process.env.MYSQLHOST ? '✅ Definida' : '❌ Não definida');
+        console.log('MYSQLPORT:', process.env.MYSQLPORT || '❌ Não definida');
+        console.log('MYSQLUSER:', process.env.MYSQLUSER ? '✅ Definida' : '❌ Não definida');
+        console.log('MYSQLDATABASE:', process.env.MYSQLDATABASE || '❌ Não definida');
+        console.log('MYSQLPASSWORD:', process.env.MYSQLPASSWORD ? '✅ Definida' : '❌ Não definida');
         console.log('NODE_ENV:', process.env.NODE_ENV || 'development');
         
         await query('SELECT 1 as test');

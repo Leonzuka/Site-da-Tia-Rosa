@@ -194,9 +194,15 @@ app.get('/health', async (req, res) => {
         },
         database_config: {
             has_database_url: !!process.env.DATABASE_URL,
-            has_mysql_host: !!(process.env.MYSQL_HOST || process.env.DB_HOST),
-            has_mysql_user: !!(process.env.MYSQL_USER || process.env.DB_USER),
-            has_mysql_database: !!(process.env.MYSQL_DATABASE || process.env.DB_NAME)
+            has_mysqlhost: !!process.env.MYSQLHOST,
+            has_mysqlport: !!process.env.MYSQLPORT,
+            has_mysqluser: !!process.env.MYSQLUSER,
+            has_mysqldatabase: !!process.env.MYSQLDATABASE,
+            has_mysqlpassword: !!process.env.MYSQLPASSWORD,
+            // Fallbacks antigas
+            has_mysql_host_fallback: !!(process.env.MYSQL_HOST || process.env.DB_HOST),
+            has_mysql_user_fallback: !!(process.env.MYSQL_USER || process.env.DB_USER),
+            has_mysql_database_fallback: !!(process.env.MYSQL_DATABASE || process.env.DB_NAME)
         }
     };
     
