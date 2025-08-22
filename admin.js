@@ -246,7 +246,7 @@ class AdminManager {
             price: parseFloat(formData.get('price')),
             quantity: parseInt(formData.get('quantity')) || 1,
             description: formData.get('description').trim(),
-            image: formData.get('image').trim() || null
+            image: document.getElementById('productImage').value.trim() || null
         };
 
         // Validação
