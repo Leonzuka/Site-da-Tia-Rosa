@@ -62,7 +62,3 @@ build/
 
 # Railway
 .railway/
-
-# Imagens de upload (opcional - descomente se não quiser versionar)
-# images/products/*
-# !images/products/.gitkeep
