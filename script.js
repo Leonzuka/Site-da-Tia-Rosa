@@ -262,6 +262,7 @@ class ProductManager {
 
 // Instância global do gerenciador
 const productManager = new ProductManager();
+window.productManager = productManager; // Disponibilizar globalmente para admin.js
 
 // Elementos DOM
 const productGrid = document.getElementById('productGrid');

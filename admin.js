@@ -1,7 +1,14 @@
 // Sistema Administrativo - Garden Rosas Decor
 class AdminManager {
     constructor() {
-        this.productManager = new ProductManager();
+        // Usar a mesma instância global do ProductManager
+        if (window.productManager) {
+            console.log('✅ [Admin] Usando ProductManager global com', window.productManager.products.length, 'produtos');
+            this.productManager = window.productManager;
+        } else {
+            console.log('⚠️ [Admin] ProductManager global não encontrado, criando novo');
+            this.productManager = new ProductManager();
+        }
         this.currentEditId = null;
         this.init();
     }
@@ -23,12 +30,26 @@ class AdminManager {
     // Inicializa dados de produtos
     async initializeProductsData() {
         try {
-            console.log('🔄 [Admin] Carregando produtos...');
-            
-            // Aguardar carregamento dos produtos via ProductManager
-            await this.productManager.loadProducts();
-            
-            console.log('✅ [Admin] Produtos carregados:', this.productManager.products.length);
+            // Se já temos produtos (instância global), não recarregar
+            if (this.productManager.products.length > 0) {
+                console.log('✅ [Admin] Produtos já disponíveis:', this.productManager.products.length);
+            } else {
+                console.log('🔄 [Admin] Carregando produtos...');
+                
+                // Se está usando instância global, aguardar um pouco caso esteja carregando
+                if (window.productManager && this.productManager.isLoading) {
+                    console.log('⏳ [Admin] Aguardando carregamento global...');
+                    let attempts = 0;
+                    while (this.productManager.isLoading && attempts < 50) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        attempts++;
+                    }
+                    console.log('✅ [Admin] Carregamento global concluído:', this.productManager.products.length);
+                } else {
+                    await this.productManager.loadProducts();
+                    console.log('✅ [Admin] Produtos carregados:', this.productManager.products.length);
+                }
+            }
             
             // Agora que os produtos estão carregados, atualizar dashboard
             this.updateDashboard();
