@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste MySQL Integration</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .result { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        button { padding: 10px 20px; margin: 5px; background: #8B4A6B; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #6d3752; }
+        pre { white-space: pre-wrap; word-break: break-word; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste de Integração MySQL</h1>
+    
+    <div>
+        <button onclick="testConnection()">🔌 Testar Conexão</button>
+        <button onclick="loadProducts()">📦 Carregar Produtos</button>
+        <button onclick="createTestProduct()">➕ Criar Produto Teste</button>
+        <button onclick="updateLastProduct()">📝 Atualizar Último Produto</button>
+        <button onclick="deleteLastProduct()">🗑️ Deletar Último Produto</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong> - ${message}`;
+            results.insertBefore(div, results.firstChild);
+        }
+
+        async function testConnection() {
+            try {
+                log('🔌 Testando conexão com API...', 'info');
+                const response = await fetch('/api/products');
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ Conexão OK! ${data.total} produtos encontrados`, 'success');
+                } else {
+                    log(`❌ Erro na API: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Erro de rede: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                log('📦 Carregando produtos...', 'info');
+                const response = await fetch('/api/products');
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ ${data.products.length} produtos carregados:`, 'success');
+                    log(`<pre>${JSON.stringify(data.products.slice(0, 3), null, 2)}</pre>`, 'info');
+                } else {
+                    log(`❌ Erro: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        async function createTestProduct() {
+            try {
+                log('➕ Criando produto teste...', 'info');
+                const productData = {
+                    name: 'Produto Teste MySQL',
+                    category: 'flores',
+                    price: 19.99,
+                    quantity: 5,
+                    description: 'Produto criado para testar integração MySQL',
+                    image: 'https://via.placeholder.com/200'
+                };
+
+                const response = await fetch('/api/products', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(productData)
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ Produto criado com ID: ${data.product.id}`, 'success');
+                    window.lastCreatedId = data.product.id;
+                } else {
+                    log(`❌ Erro: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        async function updateLastProduct() {
+            if (!window.lastCreatedId) {
+                log('❌ Nenhum produto criado ainda. Crie um primeiro.', 'error');
+                return;
+            }
+
+            try {
+                log(`📝 Atualizando produto ID ${window.lastCreatedId}...`, 'info');
+                const productData = {
+                    name: 'Produto Teste MySQL ATUALIZADO',
+                    category: 'flores',
+                    price: 29.99,
+                    quantity: 3,
+                    description: 'Produto atualizado via API MySQL',
+                    image: 'https://via.placeholder.com/300'
+                };
+
+                const response = await fetch(`/api/products/${window.lastCreatedId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(productData)
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ Produto atualizado! Novo preço: R$ ${data.product.price}`, 'success');
+                } else {
+                    log(`❌ Erro: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteLastProduct() {
+            if (!window.lastCreatedId) {
+                log('❌ Nenhum produto criado ainda. Crie um primeiro.', 'error');
+                return;
+            }
+
+            try {
+                log(`🗑️ Deletando produto ID ${window.lastCreatedId}...`, 'info');
+                const response = await fetch(`/api/products/${window.lastCreatedId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ Produto deletado: ${data.product.name}`, 'success');
+                    window.lastCreatedId = null;
+                } else {
+                    log(`❌ Erro: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Teste inicial
+        window.onload = () => {
+            log('🚀 Página de teste carregada. Clique nos botões para testar a integração MySQL.', 'info');
+        };
+    </script>
+</body>
+</html>

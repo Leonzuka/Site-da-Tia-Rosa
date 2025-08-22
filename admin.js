@@ -236,7 +236,7 @@ class AdminManager {
         this.renderProductsList(category, searchQuery);
     }
 
-    handleProductSubmit(e) {
+    async handleProductSubmit(e) {
         e.preventDefault();
         
         const formData = new FormData(e.target);
@@ -254,14 +254,20 @@ class AdminManager {
             return;
         }
 
+        // Mostrar indicador de carregamento
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = '⏳ Salvando...';
+        submitBtn.disabled = true;
+
         try {
             if (this.currentEditId) {
                 // Atualizar produto existente
-                this.productManager.updateProduct(this.currentEditId, productData);
+                await this.productManager.updateProduct(this.currentEditId, productData);
                 this.showMessage('Produto atualizado com sucesso!', 'success');
             } else {
                 // Adicionar novo produto
-                this.productManager.addProduct(productData);
+                await this.productManager.addProduct(productData);
                 this.showMessage('Produto adicionado com sucesso!', 'success');
             }
 
@@ -272,12 +278,16 @@ class AdminManager {
             this.updateLastModified();
             
         } catch (error) {
-            this.showMessage('Erro ao salvar produto. Tente novamente.', 'error');
+            this.showMessage('Erro ao salvar produto: ' + error.message, 'error');
             console.error('Erro ao salvar produto:', error);
+        } finally {
+            // Restaurar botão
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
         }
     }
 
-    handleBulkPriceSubmit(e) {
+    async handleBulkPriceSubmit(e) {
         e.preventDefault();
         
         const category = document.getElementById('bulkCategory').value;
@@ -289,37 +299,49 @@ class AdminManager {
             return;
         }
 
+        // Mostrar indicador de carregamento
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = '⏳ Atualizando...';
+        submitBtn.disabled = true;
+
         try {
-            let updatedCount = 0;
+            console.log('📊 Iniciando alteração em lote de preços...');
             
-            this.productManager.products.forEach(product => {
-                if (category === 'todos' || product.category === category) {
-                    if (changeType === 'percentage') {
-                        product.price = product.price * (1 + changeValue / 100);
-                    } else {
-                        product.price = product.price + changeValue;
-                    }
-                    
-                    // Garante que o preço não seja negativo
-                    if (product.price < 0) {
-                        product.price = 0;
-                    }
-                    
-                    updatedCount++;
-                }
+            const response = await fetch('/api/products/bulk-price', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    category: category === 'todos' ? 'todos' : category,
+                    changeType: changeType,
+                    changeValue: changeValue
+                })
             });
 
-            this.productManager.saveProducts();
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || `HTTP ${response.status}`);
+            }
+
+            // Recarregar produtos para refletir as mudanças
+            await this.productManager.loadProducts();
+            
             this.hideBulkPriceModal();
             this.updateDashboard();
             this.renderProductsList();
             this.updateLastModified();
-            
-            this.showMessage(`${updatedCount} produtos atualizados com sucesso!`, 'success');
+            this.showMessage(`${data.affectedRows} produtos atualizados com sucesso!`, 'success');
             
         } catch (error) {
-            this.showMessage('Erro ao atualizar preços. Tente novamente.', 'error');
-            console.error('Erro ao atualizar preços:', error);
+            console.error('❌ Erro na alteração em lote:', error);
+            this.showMessage('Erro ao atualizar preços: ' + error.message, 'error');
+        } finally {
+            // Restaurar botão
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
         }
     }
 
@@ -356,7 +378,7 @@ class AdminManager {
         this.showProductModal();
     }
 
-    deleteProduct(id) {
+    async deleteProduct(id) {
         const product = this.productManager.getProduct(id);
         if (!product) {
             this.showMessage('Produto não encontrado!', 'error');
@@ -365,14 +387,14 @@ class AdminManager {
 
         if (confirm(`Tem certeza que deseja excluir "${product.name}"?`)) {
             try {
-                this.productManager.deleteProduct(id);
+                await this.productManager.deleteProduct(id);
                 this.updateDashboard();
                 this.renderProductsList();
                 this.updateCategoryOverview();
                 this.updateLastModified();
                 this.showMessage('Produto excluído com sucesso!', 'success');
             } catch (error) {
-                this.showMessage('Erro ao excluir produto. Tente novamente.', 'error');
+                this.showMessage('Erro ao excluir produto: ' + error.message, 'error');
                 console.error('Erro ao excluir produto:', error);
             }
         }

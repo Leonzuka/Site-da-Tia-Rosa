@@ -1,50 +1,88 @@
 // Gerenciamento de dados dos produtos
 class ProductManager {
     constructor() {
-        this.products = this.loadProducts();
+        this.products = [];
         this.currentEditId = null;
+        this.cache = new Map();
+        this.isLoading = false;
+        this.lastSync = null;
+        this.init();
     }
 
-    // Carrega produtos do localStorage
-    loadProducts() {
+    async init() {
+        await this.loadProducts();
+    }
+
+    // Carrega produtos da API
+    async loadProducts() {
+        if (this.isLoading) return this.products;
+        
+        this.isLoading = true;
+        
         try {
-            const saved = localStorage.getItem('tiarosa_products');
-            if (saved) {
-                const products = JSON.parse(saved);
-                console.log('📦 Produtos carregados do localStorage:', products.length, 'itens');
-                console.log('🕐 Último save:', localStorage.getItem('tiarosa_last_save'));
+            console.log('📡 Carregando produtos da API...');
+            const response = await fetch('/api/products');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.products = data.products || [];
+                this.lastSync = new Date().toISOString();
                 
-                // Migração automática: adiciona quantity se não existir
-                const migratedProducts = products.map(product => ({
-                    ...product,
-                    quantity: product.quantity !== undefined ? product.quantity : 1
-                }));
+                // Cache local para fallback
+                this.saveToCache();
                 
-                // Salva produtos migrados se houve alteração
-                if (products.some(p => p.quantity === undefined)) {
-                    localStorage.setItem('tiarosa_products', JSON.stringify(migratedProducts));
-                    localStorage.setItem('tiarosa_last_save', new Date().toISOString());
-                    console.log('🔄 Produtos migrados automaticamente');
-                }
-                
-                return migratedProducts;
+                console.log('✅ Produtos carregados da API:', this.products.length, 'itens');
+                return this.products;
+            } else {
+                throw new Error(data.message || 'Resposta inválida da API');
             }
         } catch (error) {
-            console.error('❌ Erro ao carregar produtos do localStorage:', error);
+            console.error('❌ Erro ao carregar produtos da API:', error);
             
-            // Tentar backup se o principal falhar
-            try {
-                const backup = localStorage.getItem('tiarosa_products_backup');
-                if (backup) {
-                    console.log('🔄 Carregando do backup...');
-                    return JSON.parse(backup);
-                }
-            } catch (backupError) {
-                console.error('❌ Backup também falhou:', backupError);
+            // Fallback para cache local
+            const cachedProducts = this.loadFromCache();
+            if (cachedProducts.length > 0) {
+                console.log('🔄 Usando produtos do cache local:', cachedProducts.length, 'itens');
+                this.products = cachedProducts;
+                return this.products;
             }
+            
+            // Fallback final para produtos de exemplo
+            console.log('⚠️ Usando produtos de exemplo');
+            this.products = this.getDefaultProducts();
+            return this.products;
+        } finally {
+            this.isLoading = false;
         }
-        
-        // Produtos de exemplo para demonstração
+    }
+
+    // Cache local para fallback
+    saveToCache() {
+        try {
+            localStorage.setItem('tiarosa_products_cache', JSON.stringify(this.products));
+            localStorage.setItem('tiarosa_cache_timestamp', this.lastSync);
+        } catch (error) {
+            console.warn('⚠️ Não foi possível salvar cache:', error);
+        }
+    }
+
+    loadFromCache() {
+        try {
+            const cached = localStorage.getItem('tiarosa_products_cache');
+            return cached ? JSON.parse(cached) : [];
+        } catch (error) {
+            console.warn('⚠️ Erro ao carregar cache:', error);
+            return [];
+        }
+    }
+
+    // Produtos de exemplo para fallback final
+    getDefaultProducts() {
         return [
             {
                 id: 1,
@@ -325,75 +363,122 @@ class ProductManager {
         ];
     }
 
-    // Salva produtos no localStorage
+    // Não mais necessário - dados são salvos via API
+    // Mantido para compatibilidade, mas salva apenas no cache
     saveProducts() {
+        this.saveToCache();
+        console.log('✅ Cache local atualizado:', this.products.length, 'itens');
+    }
+
+    // Adiciona novo produto via API
+    async addProduct(productData) {
         try {
-            localStorage.setItem('tiarosa_products', JSON.stringify(this.products));
-            localStorage.setItem('tiarosa_products_backup', JSON.stringify(this.products));
-            localStorage.setItem('tiarosa_last_save', new Date().toISOString());
-            console.log('✅ Produtos salvos:', this.products.length, 'itens');
+            console.log('📤 Criando novo produto via API...');
+            const response = await fetch('/api/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ...productData,
+                    price: parseFloat(productData.price),
+                    quantity: parseInt(productData.quantity) || 1
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || `HTTP ${response.status}`);
+            }
+
+            // Atualizar cache local
+            this.products.push(data.product);
+            this.saveToCache();
+            
+            console.log('✅ Produto criado com sucesso:', data.product.name);
+            return data.product;
+            
         } catch (error) {
-            console.error('❌ Erro ao salvar produtos:', error);
+            console.error('❌ Erro ao criar produto:', error);
             throw error;
         }
     }
 
-    // Adiciona novo produto
-    addProduct(productData) {
-        const newProduct = {
-            id: Date.now(),
-            ...productData,
-            price: parseFloat(productData.price),
-            quantity: parseInt(productData.quantity) || 1
-        };
-        this.products.push(newProduct);
-        this.saveProducts();
-        return newProduct;
-    }
-
-    // Atualiza produto existente
-    updateProduct(id, productData) {
-        const index = this.products.findIndex(p => p.id === id);
-        if (index !== -1) {
-            const oldProduct = { ...this.products[index] };
-            this.products[index] = {
-                ...this.products[index],
-                ...productData,
-                price: parseFloat(productData.price),
-                quantity: parseInt(productData.quantity) || 1
-            };
-            
-            console.log('🔄 Atualizando produto ID:', id);
-            console.log('📊 Preço anterior:', oldProduct.price, '→ Novo preço:', this.products[index].price);
-            
-            this.saveProducts();
-            
-            // Verificar se foi salvo corretamente
-            const savedCheck = localStorage.getItem('tiarosa_products');
-            if (savedCheck) {
-                const savedProducts = JSON.parse(savedCheck);
-                const savedProduct = savedProducts.find(p => p.id === id);
-                if (savedProduct && savedProduct.price === this.products[index].price) {
-                    console.log('✅ Preço salvo com sucesso no localStorage');
-                } else {
-                    console.error('❌ Erro: Preço não foi salvo corretamente!');
-                }
+    // Atualiza produto existente via API
+    async updateProduct(id, productData) {
+        try {
+            const oldProduct = this.products.find(p => p.id === id);
+            if (!oldProduct) {
+                throw new Error('Produto não encontrado no cache local');
             }
             
-            return this.products[index];
+            console.log('🔄 Atualizando produto via API - ID:', id);
+            console.log('📊 Preço anterior:', oldProduct.price, '→ Novo preço:', parseFloat(productData.price));
+            
+            const response = await fetch(`/api/products/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ...productData,
+                    price: parseFloat(productData.price),
+                    quantity: parseInt(productData.quantity) || 1
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || `HTTP ${response.status}`);
+            }
+
+            // Atualizar cache local
+            const index = this.products.findIndex(p => p.id === id);
+            if (index !== -1) {
+                this.products[index] = data.product;
+            }
+            this.saveToCache();
+            
+            console.log('✅ Produto atualizado com sucesso:', data.product.name);
+            console.log('✅ Preço confirmado no servidor:', data.product.price);
+            return data.product;
+            
+        } catch (error) {
+            console.error('❌ Erro ao atualizar produto:', error);
+            throw error;
         }
-        return null;
     }
 
-    // Remove produto
-    deleteProduct(id) {
-        const index = this.products.findIndex(p => p.id === id);
-        if (index !== -1) {
-            const deleted = this.products.splice(index, 1)[0];
-            this.saveProducts();
-            return deleted;
+    // Remove produto via API
+    async deleteProduct(id) {
+        try {
+            console.log('🗑️ Deletando produto via API - ID:', id);
+            const response = await fetch(`/api/products/${id}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || `HTTP ${response.status}`);
+            }
+
+            // Remover do cache local
+            const index = this.products.findIndex(p => p.id === id);
+            if (index !== -1) {
+                this.products.splice(index, 1);
+            }
+            this.saveToCache();
+            
+            console.log('✅ Produto deletado com sucesso:', data.product.name);
+            return data.product;
+            
+        } catch (error) {
+            console.error('❌ Erro ao deletar produto:', error);
+            throw error;
         }
-        return null;
     }
 
     // Busca produtos
