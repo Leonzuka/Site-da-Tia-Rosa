@@ -180,6 +180,32 @@
     font-weight: 500;
 }
 
+/* Destaque especial para valor do estoque */
+.stat-card:nth-child(4) {
+    background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+    border: 2px solid #9ae6b4;
+}
+
+.stat-card:nth-child(4):hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(40, 167, 69, 0.2);
+    border-color: #28a745;
+}
+
+.stat-card:nth-child(4) .stat-info h3 {
+    color: #28a745;
+    font-weight: 900;
+    text-shadow: 0 2px 4px rgba(40, 167, 69, 0.1);
+}
+
+.stat-card:nth-child(4) .stat-icon {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.stat-card:nth-child(4)::before {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
 /* Quick Actions */
 .action-buttons {
     display: grid;
@@ -500,17 +526,22 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for better mobile support */
     background: rgba(0, 0, 0, 0.8);
     z-index: 2000;
     animation: fadeIn 0.3s ease;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .admin-modal.show {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 20px;
+    padding: 10px;
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for better mobile support */
 }
 
 .admin-modal-content {
@@ -519,9 +550,13 @@
     width: 100%;
     max-width: 600px;
     max-height: 90vh;
+    max-height: 90dvh; /* Dynamic viewport height for better mobile support */
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     animation: slideInUp 0.4s ease;
+    margin: auto 0;
+    align-self: flex-start;
 }
 
 .admin-modal-header {
@@ -739,6 +774,10 @@
 }
 
 @media (max-width: 480px) {
+    .admin-main {
+        padding: 1rem 0;
+    }
+    
     .admin-main section {
         padding: 1rem;
         margin-bottom: 1rem;
@@ -759,6 +798,23 @@
         height: 40px;
         font-size: 1.2rem;
         margin-bottom: 0.75rem;
+    }
+    
+    /* Melhor visibilidade para valor do estoque em mobile */
+    .stat-card:nth-child(4) {
+        background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+        border: 2px solid #9ae6b4;
+    }
+    
+    .stat-card:nth-child(4) .stat-info h3 {
+        font-size: 1.2rem;
+        color: #28a745;
+        font-weight: 900;
+        text-shadow: 0 1px 2px rgba(40, 167, 69, 0.1);
+    }
+    
+    .stat-card:nth-child(4) .stat-icon {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
     }
     
     .stat-info h3 {
@@ -793,6 +849,8 @@
     .admin-modal-content {
         margin: 10px;
         max-width: calc(100% - 20px);
+        max-height: calc(100vh - 20px);
+        max-height: calc(100dvh - 20px);
     }
     
     .admin-form {
@@ -1064,9 +1122,9 @@
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border: 2px solid #e2e8f0;
     border-radius: 12px;
-    padding: 1.5rem;
+    padding: 0.75rem;
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .info-card i {
@@ -1189,19 +1247,21 @@
 
 @media (max-width: 480px) {
     .calculator-content {
-        padding: 1.5rem;
+        padding: 1rem;
     }
     
     .info-card {
         padding: 1rem;
+        margin-bottom: 1rem;
     }
     
     .calculation-result {
-        padding: 1.5rem;
+        padding: 1rem;
+        margin: 1rem 0;
     }
     
     .result-value {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
     
     .breakdown-item {
@@ -1209,11 +1269,137 @@
         align-items: flex-start;
         text-align: left;
         gap: 0.25rem;
+        padding: 0.5rem;
     }
     
     .breakdown-item span:last-child {
         align-self: flex-end;
+        font-size: 1rem;
+    }
+    
+    /* Melhor suporte para teclado virtual */
+    .admin-modal.show {
+        align-items: flex-start;
+        padding: 5px;
+    }
+    
+    .admin-modal-content {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        border-radius: 15px;
+        max-height: none;
+        min-height: auto;
+    }
+    
+    .calculator-form .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .calculator-form input[type="number"] {
+        font-size: 16px; /* Previne zoom no iOS */
+        padding: 12px;
+        border-radius: 8px;
+    }
+}
+
+/* Melhorias específicas para teclado virtual em dispositivos móveis */
+@media (max-height: 500px) and (max-width: 768px) {
+    /* Quando a altura da viewport é reduzida (teclado virtual ativo) */
+    .admin-modal.show {
+        padding: 0;
+        align-items: stretch;
+    }
+    
+    .admin-modal-content {
+        border-radius: 0;
+        max-height: 100vh;
+        max-height: 100dvh;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .calculator-content {
+        padding: 0.5rem;
+        overflow-y: auto;
+        flex: 1;
+    }
+    
+    .info-card {
+        display: none; /* Oculta informações para economizar espaço */
+    }
+    
+    .calculation-result {
+        margin: 0.5rem 0;
+        padding: 0.75rem;
+    }
+    
+    .result-value {
+        font-size: 1.5rem;
+    }
+    
+    .breakdown {
+        display: none; /* Oculta breakdown detalhado para economizar espaço */
+    }
+    
+    .admin-modal-header {
+        border-radius: 0;
+        padding: 1rem;
+    }
+    
+    .admin-modal-header h3 {
         font-size: 1.1rem;
+    }
+}
+
+/* Suporte adicional para dispositivos em orientação landscape */
+@media (max-height: 450px) and (orientation: landscape) {
+    .calculator-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        padding: 0.5rem;
+    }
+    
+    .calculator-info {
+        margin-bottom: 0;
+    }
+    
+    .calculation-result {
+        grid-column: 1 / -1;
+        margin: 0.5rem 0;
+    }
+    
+    .form-actions {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Melhorias gerais para inputs em dispositivos móveis */
+.admin-form input[type="number"],
+.admin-form input[type="text"],
+.admin-form input[type="url"],
+.admin-form textarea,
+.admin-form select {
+    font-size: 16px; /* Previne zoom automático no iOS */
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* Foco melhorado para acessibilidade */
+.admin-form input:focus,
+.admin-form textarea:focus,
+.admin-form select:focus {
+    outline: 2px solid #8B4A6B;
+    outline-offset: 2px;
+    border-color: #8B4A6B;
+}
+
+/* Suporte para dispositivos com notch */
+@supports (padding: max(0px)) {
+    .admin-modal-content {
+        padding-left: max(env(safe-area-inset-left), 0px);
+        padding-right: max(env(safe-area-inset-right), 0px);
     }
 }
 

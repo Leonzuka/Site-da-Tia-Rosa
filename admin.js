@@ -583,7 +583,14 @@ class AdminManager {
     formatPrice(price) {
         // Garantir que o preço seja um número
         const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-        return `R$ ${(numPrice || 0).toFixed(2).replace('.', ',')}`;
+        
+        // Usar formatação brasileira nativa
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(numPrice || 0);
     }
 
     formatDate(date) {
