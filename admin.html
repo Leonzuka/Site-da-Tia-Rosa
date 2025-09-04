@@ -81,6 +81,10 @@
                         <i class="fas fa-plus"></i>
                         Adicionar Produto
                     </button>
+                    <button class="action-btn success" onclick="showPriceCalculatorModal()">
+                        <i class="fas fa-calculator"></i>
+                        Calculadora de Preços
+                    </button>
                     <button class="action-btn secondary" onclick="showBulkPriceModal()">
                         <i class="fas fa-dollar-sign"></i>
                         Alterar Preços Em LOTE
@@ -281,6 +285,90 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Calculadora de Preços -->
+    <div id="priceCalculatorModal" class="admin-modal">
+        <div class="admin-modal-content">
+            <div class="admin-modal-header">
+                <h3>
+                    <i class="fas fa-calculator"></i>
+                    Calculadora de Preços - Simples Nacional
+                </h3>
+                <button class="admin-close-btn" onclick="hidePriceCalculatorModal()">&times;</button>
+            </div>
+            
+            <div class="calculator-content">
+                <div class="calculator-info">
+                    <div class="info-card">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Alíquota Simples Nacional: <strong>6%</strong></p>
+                        <p>Fórmula: <strong>(Custo + Despesas + Lucro) ÷ (1 - 0.06)</strong></p>
+                    </div>
+                </div>
+
+                <form id="priceCalculatorForm" class="calculator-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productCost">Custo do Produto (R$):</label>
+                            <input type="number" id="productCost" step="0.01" min="0" 
+                                   placeholder="0,00" oninput="calculateSalePrice()">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="operatingExpenses">
+                                Despesas Operacionais (R$): 
+                                <span class="help-tooltip" title="Inclui aluguel, embalagem, frete, energia, água, etc.">?</span>
+                            </label>
+                            <input type="number" id="operatingExpenses" step="0.01" min="0" 
+                                   placeholder="0,00" oninput="calculateSalePrice()">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="desiredProfit">Lucro Desejado (R$):</label>
+                            <input type="number" id="desiredProfit" step="0.01" min="0" 
+                                   placeholder="0,00" oninput="calculateSalePrice()">
+                        </div>
+                    </div>
+                    
+                    <div class="calculation-result">
+                        <div class="result-card">
+                            <h4><i class="fas fa-tag"></i> Preço de Venda Calculado</h4>
+                            <div class="result-value" id="calculatedPrice">R$ 0,00</div>
+                        </div>
+                        
+                        <div class="breakdown">
+                            <h5><i class="fas fa-chart-pie"></i> Composição do Preço</h5>
+                            <div class="breakdown-item">
+                                <span>Custo + Despesas + Lucro:</span>
+                                <span id="totalCosts">R$ 0,00</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>Alíquota Simples Nacional (6%):</span>
+                                <span id="taxAmount">R$ 0,00</span>
+                            </div>
+                            <div class="breakdown-item total">
+                                <span>Preço Final de Venda:</span>
+                                <span id="finalPrice">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="admin-btn secondary" onclick="clearCalculator()">
+                            <i class="fas fa-eraser"></i>
+                            Limpar
+                        </button>
+                        <button type="button" class="admin-btn primary" onclick="hidePriceCalculatorModal()">
+                            <i class="fas fa-times"></i>
+                            Fechar
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 

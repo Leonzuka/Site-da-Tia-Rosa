@@ -512,9 +512,29 @@ class AdminManager {
         document.getElementById('bulkPriceForm').reset();
     }
 
+    showPriceCalculatorModal() {
+        const modal = document.getElementById('priceCalculatorModal');
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        
+        setTimeout(() => {
+            document.getElementById('productCost').focus();
+        }, 300);
+    }
+
+    hidePriceCalculatorModal() {
+        const modal = document.getElementById('priceCalculatorModal');
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+        
+        // Limpar formulário
+        clearCalculator();
+    }
+
     hideAllModals() {
         this.hideProductModal();
         this.hideBulkPriceModal();
+        this.hidePriceCalculatorModal();
     }
 
     // Funções utilitárias
@@ -664,6 +684,52 @@ function showBulkPriceModal() {
 
 function hideBulkPriceModal() {
     adminManager.hideBulkPriceModal();
+}
+
+function showPriceCalculatorModal() {
+    adminManager.showPriceCalculatorModal();
+}
+
+function hidePriceCalculatorModal() {
+    adminManager.hidePriceCalculatorModal();
+}
+
+function calculateSalePrice() {
+    const cost = parseFloat(document.getElementById('productCost').value) || 0;
+    const expenses = parseFloat(document.getElementById('operatingExpenses').value) || 0;
+    const profit = parseFloat(document.getElementById('desiredProfit').value) || 0;
+    const aliquota = 0.06; // 6% Simples Nacional
+    
+    // Fórmula: (Custo + Despesas + Lucro) / (1 - Alíquota)
+    const totalCosts = cost + expenses + profit;
+    const salePrice = totalCosts / (1 - aliquota);
+    const taxAmount = salePrice - totalCosts;
+    
+    // Formatação em pt-BR
+    const formatCurrency = (value) => {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(value);
+    };
+    
+    // Atualizar elementos
+    document.getElementById('calculatedPrice').textContent = formatCurrency(salePrice);
+    document.getElementById('totalCosts').textContent = formatCurrency(totalCosts);
+    document.getElementById('taxAmount').textContent = formatCurrency(taxAmount);
+    document.getElementById('finalPrice').textContent = formatCurrency(salePrice);
+}
+
+function clearCalculator() {
+    document.getElementById('productCost').value = '';
+    document.getElementById('operatingExpenses').value = '';
+    document.getElementById('desiredProfit').value = '';
+    
+    // Limpar resultados
+    document.getElementById('calculatedPrice').textContent = 'R$ 0,00';
+    document.getElementById('totalCosts').textContent = 'R$ 0,00';
+    document.getElementById('taxAmount').textContent = 'R$ 0,00';
+    document.getElementById('finalPrice').textContent = 'R$ 0,00';
 }
 
 function exportData() {
