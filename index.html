@@ -26,33 +26,204 @@
 
     <main>
         <section id="home" class="hero">
+            <div class="hero-background">
+                <div class="hero-slide active" data-bg="url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><linearGradient id="bg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23E8B4CB"/><stop offset="50%" stop-color="%23D48FB1"/><stop offset="100%" stop-color="%23C76B96"/></linearGradient></defs><rect width="1200" height="600" fill="url(%23bg1)"/><circle cx="200" cy="150" r="80" fill="%23FFD700" opacity="0.1"/><circle cx="900" cy="400" r="120" fill="%23FFF" opacity="0.05"/><path d="M100,300 Q300,200 500,300 T900,300" stroke="%23FFD700" stroke-width="2" fill="none" opacity="0.3"/></svg>')"></div>
+                <div class="hero-slide" data-bg="url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23B8860B"/><stop offset="50%" stop-color="%23DAA520"/><stop offset="100%" stop-color="%23FFD700"/></linearGradient></defs><rect width="1200" height="600" fill="url(%23bg2)"/><circle cx="800" cy="200" r="90" fill="%238B4A6B" opacity="0.1"/><circle cx="300" cy="450" r="100" fill="%23FFF" opacity="0.05"/></svg>')"></div>
+                <div class="hero-slide" data-bg="url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%238B4A6B"/><stop offset="50%" stop-color="%23A0506D"/><stop offset="100%" stop-color="%23B85A7A"/></linearGradient></defs><rect width="1200" height="600" fill="url(%23bg3)"/><circle cx="600" cy="300" r="150" fill="%23FFD700" opacity="0.05"/><path d="M0,400 Q400,200 800,400 T1200,350" stroke="%23FFF" stroke-width="3" fill="none" opacity="0.2"/></svg>')"></div>
+            </div>
+            <div class="hero-particles"></div>
             <div class="container">
                 <div class="hero-content">
-                    <h2>Flores artificias, Buquês, Artigos Religiosos, Quadros Católicos, Bijuteria, Vasos e Velas. </h2>
-                    <p>Encontre as mais belas flores artificais, itens religiosos, utensilios domésticos, bijuteria e quadros para decorar sua casa e expressar sua fé.</p>
-                    <button class="btn-primary" onclick="scrollToProducts()">Ver Produtos</button>
+                    <div class="hero-badge">
+                        <i class="fas fa-rose"></i>
+                        <span>Mais de 15 anos de tradição</span>
+                    </div>
+                    <h2 class="hero-title">
+                        <span class="hero-title-line">Flores Artificiais &</span>
+                        <span class="hero-title-line">Artigos Religiosos</span>
+                        <span class="hero-title-accent">de Alta Qualidade</span>
+                    </h2>
+                    <p class="hero-description">Descubra nossa coleção exclusiva de flores artificiais, buquês personalizados, artigos religiosos, quadros católicos, bijuterias, vasos decorativos e velas aromáticas. Produtos selecionados com carinho para decorar sua casa e expressar sua fé.</p>
+                    <div class="hero-actions">
+                        <button class="btn-primary hero-cta" onclick="scrollToProducts()">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>Explorar Produtos</span>
+                        </button>
+                        <a href="https://wa.me/558799275516?text=Ol%C3%A1%21%20Vim%20do%20site%20Garden%20Rosas%20Decor%20e%20gostaria%20de%20conhecer%20os%20produtos.%20Poderia%20me%20ajudar%3F" target="_blank" class="btn-secondary hero-whatsapp">
+                            <i class="fab fa-whatsapp"></i>
+                            <span>Falar no WhatsApp</span>
+                        </a>
+                    </div>
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <i class="fas fa-heart"></i>
+                            <span>Produtos Selecionados</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-pray"></i>
+                            <span>Tradição Familiar</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="hero-image-container">
+                        <div class="floating-card floating-card-1">
+                            <i class="fas fa-rose"></i>
+                            <span>Flores</span>
+                        </div>
+                        <div class="floating-card floating-card-2">
+                            <i class="fas fa-cross"></i>
+                            <span>Artigos Religiosos</span>
+                        </div>
+                        <div class="floating-card floating-card-3">
+                            <i class="fas fa-candle-holder"></i>
+                            <span>Velas</span>
+                        </div>
+                        <div class="hero-main-image">
+                            <img src="https://res.cloudinary.com/dsypayhq4/image/upload/v1755887554/tia-rosa/produtos/tia-rosa/produtos/produto_1755887554662_D_NQ_NP_611343-MLB76614544375_052024-O-vaso-de-plantas-para-mesa-de-jantar-vasinhos-de-flores-vidro.webp" alt="Garden Rosas Decor" loading="lazy">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="showcase-section">
+            <div class="container">
+                <div class="showcase-header">
+                    <h2 class="showcase-title">Categorias em Destaque</h2>
+                    <p class="showcase-subtitle">Explore nossa variedade de produtos especialmente selecionados</p>
+                </div>
+                <div class="showcase-grid">
+                    <div class="showcase-card" data-category="flores">
+                        <div class="showcase-image">
+                            <img src="https://res.cloudinary.com/dsypayhq4/image/upload/v1757263071/alta-1112-1_zkkvdl.jpg" alt="Flores Artificiais" loading="lazy">
+                            <div class="showcase-overlay">
+                                <i class="fas fa-rose"></i>
+                            </div>
+                        </div>
+                        <div class="showcase-content">
+                            <h3>Flores Artificiais</h3>
+                            <p>Buquês e arranjos que mantêm sua beleza por muito tempo</p>
+                            <div class="showcase-hover">Ver Coleção</div>
+                        </div>
+                    </div>
+                    <div class="showcase-card" data-category="artigos">
+                        <div class="showcase-image">
+                            <img src="https://res.cloudinary.com/dsypayhq4/image/upload/v1755886736/tia-rosa/produtos/tia-rosa/produtos/produto_1755886736644_Crucifixo-Madeira-Tradicional-12cm-Parede-Detalhes.webp" alt="Artigos Religiosos" loading="lazy">
+                            <div class="showcase-overlay">
+                                <i class="fas fa-pray"></i>
+                            </div>
+                        </div>
+                        <div class="showcase-content">
+                            <h3>Artigos Religiosos</h3>
+                            <p>Itens sagrados para fortalecer sua fé e devoção</p>
+                            <div class="showcase-hover">Ver Coleção</div>
+                        </div>
+                    </div>
+                    <div class="showcase-card" data-category="quadros">
+                        <div class="showcase-image">
+                            <img src="https://res.cloudinary.com/dsypayhq4/image/upload/v1755885369/tia-rosa/produtos/tia-rosa/produtos/produto_1755885369673_WhatsApp_Image_2025-08-21_at_11.jpg" alt="Quadros Católicos" loading="lazy">
+                            <div class="showcase-overlay">
+                                <i class="fas fa-cross"></i>
+                            </div>
+                        </div>
+                        <div class="showcase-content">
+                            <h3>Quadros Católicos</h3>
+                            <p>Arte sacra para decorar com fé e elegância</p>
+                            <div class="showcase-hover">Ver Coleção</div>
+                        </div>
+                    </div>
+                    <div class="showcase-card" data-category="velas">
+                        <div class="showcase-image">
+                            <img src="https://res.cloudinary.com/dsypayhq4/image/upload/v1755885464/tia-rosa/produtos/tia-rosa/produtos/produto_1755885464489_velas-coloridas2.jpg" alt="Velas e Aromáticos" loading="lazy">
+                            <div class="showcase-overlay">
+                                <i class="fas fa-candle-holder"></i>
+                            </div>
+                        </div>
+                        <div class="showcase-content">
+                            <h3>Velas & Aromáticos</h3>
+                            <p>Ambiente acolhedor com nossas velas especiais</p>
+                            <div class="showcase-hover">Ver Coleção</div>
+                        </div>
+                    </div>
+                    <div class="showcase-card" data-category="vasos">
+                        <div class="showcase-image">
+                            <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop&crop=center" alt="Vasos Decorativos" loading="lazy">
+                            <div class="showcase-overlay">
+                                <i class="fas fa-seedling"></i>
+                            </div>
+                        </div>
+                        <div class="showcase-content">
+                            <h3>Vasos Decorativos</h3>
+                            <p>Peças únicas para complementar sua decoração</p>
+                            <div class="showcase-hover">Ver Coleção</div>
+                        </div>
+                    </div>
+                    <div class="showcase-card" data-category="utensilios">
+                        <div class="showcase-image">
+                            <img src="https://res.cloudinary.com/dsypayhq4/image/upload/v1757263087/71BkWw2OBbL._UF894_1000_QL80__nkxvwj.jpg" alt="Utensílios Domésticos" loading="lazy">
+                            <div class="showcase-overlay">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                        </div>
+                        <div class="showcase-content">
+                            <h3>Utensílios Domésticos</h3>
+                            <p>Praticidade e beleza para seu dia a dia</p>
+                            <div class="showcase-hover">Ver Coleção</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
         <section id="produtos" class="products-section">
             <div class="container">
-                <h2 class="section-title">Nossos Produtos</h2>
+                <div class="products-header">
+                    <h2 class="section-title">Todos os Nossos Produtos</h2>
+                    <p class="section-subtitle">Descubra nossa coleção completa de produtos selecionados especialmente para você</p>
+                </div>
                 
-                <div class="filters">
-                    <div class="search-bar">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="searchInput" placeholder="Buscar produtos...">
+                <div class="modern-filters">
+                    <div class="search-container">
+                        <div class="search-bar-modern">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="searchInput" placeholder="O que você está procurando?">
+                            <div class="search-suggestions"></div>
+                        </div>
                     </div>
-                    <div class="category-filters">
-                        <button class="filter-btn active" data-category="todos">Todos</button>
-                        <button class="filter-btn" data-category="flores">Flores</button>
-                        <button class="filter-btn" data-category="velas">Velas</button>
-                        <button class="filter-btn" data-category="quadros">Quadros</button>
-                        <button class="filter-btn" data-category="santinhos">Santinhos</button>
-                        <button class="filter-btn" data-category="utensilios">Utensílios</button>
-                        <button class="filter-btn" data-category="artigos">Artigos</button>
-                        <button class="filter-btn" data-category="vasos">Vasos</button>
+                    <div class="category-filters-modern">
+                        <button class="filter-btn-modern active" data-category="todos">
+                            <i class="fas fa-th"></i>
+                            <span>Todos</span>
+                        </button>
+                        <button class="filter-btn-modern" data-category="flores">
+                            <i class="fas fa-rose"></i>
+                            <span>Flores</span>
+                        </button>
+                        <button class="filter-btn-modern" data-category="velas">
+                            <i class="fas fa-candle-holder"></i>
+                            <span>Velas</span>
+                        </button>
+                        <button class="filter-btn-modern" data-category="quadros">
+                            <i class="fas fa-image"></i>
+                            <span>Quadros</span>
+                        </button>
+                        <button class="filter-btn-modern" data-category="santinhos">
+                            <i class="fas fa-bookmark"></i>
+                            <span>Santinhos</span>
+                        </button>
+                        <button class="filter-btn-modern" data-category="utensilios">
+                            <i class="fas fa-utensils"></i>
+                            <span>Utensílios</span>
+                        </button>
+                        <button class="filter-btn-modern" data-category="artigos">
+                            <i class="fas fa-pray"></i>
+                            <span>Artigos</span>
+                        </button>
+                        <button class="filter-btn-modern" data-category="vasos">
+                            <i class="fas fa-seedling"></i>
+                            <span>Vasos</span>
+                        </button>
                     </div>
                 </div>
 

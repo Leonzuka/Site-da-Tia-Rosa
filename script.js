@@ -1,3 +1,296 @@
+// ====== FUNCIONALIDADES MODERNAS DA PÁGINA ======
+
+// Hero Slider com transições automáticas
+class HeroSlider {
+    constructor() {
+        this.slides = document.querySelectorAll('.hero-slide');
+        this.currentSlide = 0;
+        this.init();
+    }
+    
+    init() {
+        if (this.slides.length > 1) {
+            setInterval(() => {
+                this.nextSlide();
+            }, 8000); // Troca a cada 8 segundos
+        }
+    }
+    
+    nextSlide() {
+        this.slides[this.currentSlide].classList.remove('active');
+        this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+        this.slides[this.currentSlide].classList.add('active');
+    }
+}
+
+// Header com efeito de scroll
+class ModernHeader {
+    constructor() {
+        this.header = document.querySelector('.header');
+        this.init();
+    }
+    
+    init() {
+        if (!this.header) return;
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                this.header.classList.add('scrolled');
+            } else {
+                this.header.classList.remove('scrolled');
+            }
+        });
+    }
+}
+
+// Showcase Cards com interações
+class ShowcaseInteractions {
+    constructor() {
+        this.cards = document.querySelectorAll('.showcase-card');
+        this.init();
+    }
+    
+    init() {
+        this.cards.forEach(card => {
+            card.addEventListener('click', () => {
+                const category = card.dataset.category;
+                this.filterProducts(category);
+                this.scrollToProducts();
+            });
+        });
+    }
+    
+    filterProducts(category) {
+        console.log('🏷️ ShowcaseInteractions.filterProducts chamado para:', category);
+        
+        // Atualizar filtro ativo em TODOS os tipos de botões
+        document.querySelectorAll('.filter-btn-modern, .filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Tentar encontrar o botão correto por categoria
+        const targetBtn = document.querySelector(`[data-category="${category}"].filter-btn-modern`) || 
+                          document.querySelector(`[data-category="${category}"].filter-btn`);
+        if (targetBtn) {
+            targetBtn.classList.add('active');
+            console.log('✅ Botão ativado:', targetBtn);
+        } else {
+            console.warn('⚠️ Botão não encontrado para categoria:', category);
+        }
+        
+        // Filtrar produtos (integração com o sistema existente)
+        if (typeof window.renderProducts === 'function' && typeof window.currentCategory !== 'undefined') {
+            console.log('📊 Aplicando filtro via renderProducts...');
+            window.currentCategory = category;
+            window.renderProducts();
+        } else {
+            console.warn('⚠️ Sistema de produtos não disponível ainda');
+            // Fallback: rolar para a seção de produtos e mostrar mensagem
+            this.scrollToProducts();
+        }
+    }
+    
+    scrollToProducts() {
+        const productsSection = document.getElementById('produtos');
+        if (productsSection) {
+            productsSection.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    }
+}
+
+// Animações de entrada
+class ScrollAnimations {
+    constructor() {
+        this.observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        this.init();
+    }
+    
+    init() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, this.observerOptions);
+        
+        // Observar elementos que devem animar
+        const animateElements = document.querySelectorAll('.section-title, .showcase-card, .product-card');
+        animateElements.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
+        });
+    }
+}
+
+// Filtros modernos com melhor UX - Integração unificada
+class ModernFilters {
+    constructor() {
+        this.searchInput = document.getElementById('searchInput');
+        this.filterBtns = document.querySelectorAll('.filter-btn-modern');
+        // Também gerenciar os filtros antigos para compatibilidade
+        this.oldFilterBtns = document.querySelectorAll('.filter-btn');
+        this.init();
+    }
+    
+    init() {
+        if (this.searchInput) {
+            // Debounce para pesquisa
+            let timeout;
+            this.searchInput.addEventListener('input', (e) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    this.handleSearch(e);
+                }, 300);
+            });
+        }
+        
+        // Filtros de categoria modernos
+        this.filterBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.handleCategoryFilter(e);
+            });
+        });
+        
+        // Garantir compatibilidade com filtros antigos
+        this.oldFilterBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.handleCategoryFilter(e);
+            });
+        });
+    }
+    
+    handleSearch(e) {
+        const searchValue = e.target.value;
+        console.log('🔍 Pesquisando por:', searchValue);
+        
+        // Atualizar variável global
+        if (typeof window.currentSearch !== 'undefined') {
+            window.currentSearch = searchValue;
+        }
+        
+        // Chamar função de renderização
+        if (typeof window.renderProducts === 'function') {
+            window.renderProducts();
+        }
+    }
+    
+    handleCategoryFilter(e) {
+        e.preventDefault();
+        
+        const clickedBtn = e.target.closest('button') || e.target;
+        const category = clickedBtn.dataset.category;
+        
+        console.log('📂 Filtrando categoria:', category);
+        
+        // Atualizar visual de TODOS os botões (modernos e antigos)
+        document.querySelectorAll('.filter-btn-modern, .filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Ativar o botão clicado
+        clickedBtn.classList.add('active');
+        
+        // Atualizar variáveis globais
+        if (typeof window.currentCategory !== 'undefined') {
+            window.currentCategory = category;
+        }
+        
+        // Chamar função de renderização
+        if (typeof window.renderProducts === 'function') {
+            window.renderProducts();
+        } else {
+            console.warn('⚠️ Função renderProducts não encontrada');
+        }
+    }
+}
+
+// Armazenar instâncias globalmente para acesso
+window.modernComponents = {};
+
+// Inicialização de todas as funcionalidades modernas
+document.addEventListener('DOMContentLoaded', () => {
+    // Garantir que as variáveis globais estejam inicializadas
+    if (typeof window.currentCategory === 'undefined') {
+        window.currentCategory = 'todos';
+    }
+    if (typeof window.currentSearch === 'undefined') {
+        window.currentSearch = '';
+    }
+    
+    console.log('🚀 Variáveis globais inicializadas:', {
+        currentCategory: window.currentCategory,
+        currentSearch: window.currentSearch
+    });
+    
+    // Inicializar componentes que não dependem do sistema de produtos
+    window.modernComponents.heroSlider = new HeroSlider();
+    window.modernComponents.modernHeader = new ModernHeader();
+    window.modernComponents.scrollAnimations = new ScrollAnimations();
+    
+    // Aguardar o sistema de produtos estar pronto antes de inicializar filtros
+    let initAttempts = 0;
+    const maxAttempts = 20; // Máximo 4 segundos tentando
+    
+    const initFilters = () => {
+        initAttempts++;
+        console.log(`🔄 Tentativa ${initAttempts}/${maxAttempts} de inicializar filtros...`);
+        
+        const hasRenderProducts = typeof window.renderProducts === 'function';
+        const hasCurrentCategory = typeof window.currentCategory !== 'undefined';
+        const hasProductManager = window.productManager && window.productManager.products;
+        
+        console.log('📊 Estado do sistema:', {
+            renderProducts: hasRenderProducts,
+            currentCategory: hasCurrentCategory,
+            currentCategoryValue: window.currentCategory,
+            productManager: !!hasProductManager
+        });
+        
+        if (hasRenderProducts && hasCurrentCategory) {
+            try {
+                // Remover event listeners antigos para evitar conflitos
+                const oldBtns = document.querySelectorAll('.filter-btn');
+                oldBtns.forEach(btn => {
+                    // Clonar o elemento para remover todos os event listeners
+                    const newBtn = btn.cloneNode(true);
+                    if (btn.parentNode) {
+                        btn.parentNode.replaceChild(newBtn, btn);
+                    }
+                });
+                
+                // Inicializar componentes modernos
+                window.modernComponents.showcaseInteractions = new ShowcaseInteractions();
+                window.modernComponents.modernFilters = new ModernFilters();
+                console.log('✅ Componentes modernos inicializados com sucesso!');
+                
+                // Teste rápido
+                console.log('🧪 Testando filtro: window.currentCategory =', window.currentCategory);
+                
+            } catch (error) {
+                console.error('❌ Erro ao inicializar componentes modernos:', error);
+            }
+        } else if (initAttempts < maxAttempts) {
+            // Tentar novamente em 200ms se o sistema ainda não está pronto
+            setTimeout(initFilters, 200);
+        } else {
+            console.error('❌ Falha ao inicializar filtros após', maxAttempts, 'tentativas');
+        }
+    };
+    
+    // Inicializar filtros após um pequeno delay
+    setTimeout(initFilters, 500);
+});
+
 // Gerenciamento de dados dos produtos
 class ProductManager {
     constructor() {
@@ -7,6 +300,7 @@ class ProductManager {
         this.isLoading = false;
         this.lastSync = null;
         this.instanceId = Math.random().toString(36).substr(2, 9); // ID único para debug
+        this.currentCategory = 'todos'; // Categoria atual
         console.log('🆕 ProductManager criado com ID:', this.instanceId);
         this.init();
     }
@@ -288,9 +582,9 @@ const categoryFilters = document.querySelectorAll('.filter-btn');
 const productForm = document.getElementById('productForm');
 const navLinks = document.querySelectorAll('.nav-link');
 
-// Estado da aplicação
-let currentCategory = 'todos';
-let currentSearch = '';
+// Estado da aplicação - Variáveis globais
+window.currentCategory = 'todos';
+window.currentSearch = '';
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', async function() {
@@ -373,9 +667,9 @@ async function renderProducts() {
         return;
     }
     
-    const products = productManager.searchProducts(currentSearch, currentCategory);
+    const products = productManager.searchProducts(window.currentSearch, window.currentCategory);
     console.log('📦 Produtos para renderizar:', products.length);
-    console.log('🔍 Filtros atuais - Search:', currentSearch, 'Category:', currentCategory);
+    console.log('🔍 Filtros atuais - Search:', window.currentSearch, 'Category:', window.currentCategory);
     
     if (products.length === 0) {
         console.log('⚠️ Nenhum produto encontrado, mostrando estado vazio');
@@ -482,7 +776,7 @@ function getCategoryName(category) {
 
 // Manipuladores de eventos
 async function handleSearch(e) {
-    currentSearch = e.target.value;
+    window.currentSearch = e.target.value;
     await renderProducts();
 }
 
@@ -492,7 +786,7 @@ async function handleCategoryFilter(e) {
     // Adiciona active ao botão clicado
     e.target.classList.add('active');
     
-    currentCategory = e.target.dataset.category;
+    window.currentCategory = e.target.dataset.category;
     await renderProducts();
 }
 
